@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+:root {
+  /* Core brand palette */
+  --color-primary-black: #1A1A1A;
+  --color-brand-gold: #D4AF37;
+  --color-gold-hover: #B8962E;
+  
+  /* Text and background */
+  --color-main-text: #4A4A4A;
+  --color-muted-text: #7A7A7A;
+  --color-soft-bg: #F8F9FA;
+  --color-white: #FFFFFF;
+  
+  /* Semantic state */
+  --color-danger-red: #CC0000;
+}
+
+@theme inline {
+  --color-brand-black: var(--color-primary-black);
+  --color-brand-gold: var(--color-brand-gold);
+  --color-gold-hover: var(--color-gold-hover);
+  --color-text-main: var(--color-main-text);
+  --color-text-muted: var(--color-muted-text);
+  --color-bg-soft: var(--color-soft-bg);
+  --color-danger: var(--color-danger-red);
+
+  --font-sans: var(--font-poppins), Arial, Helvetica, sans-serif;
+}
+
+body {
+  background-color: var(--color-soft-bg);
+  color: var(--color-main-text);
+  font-family: var(--font-poppins), sans-serif;
+}
