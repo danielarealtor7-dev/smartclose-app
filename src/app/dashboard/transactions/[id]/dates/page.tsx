@@ -64,12 +64,12 @@ export default function TransactionDatesPage() {
   const handleAdd = (data: Record<string, unknown>) => {
     const newId = `d${Date.now()}`
     setDates(prev => [...prev, {
-      ...data,
+      ...(data as Partial<TransactionDate>),
       id: newId,
       transaction_id: 'mock-1',
-      original_date: data.due_date,
+      original_date: data.due_date as string,
       status: 'PENDING'
-    }])
+    } as TransactionDate])
   }
 
   const handleComplete = (id: string) => {
