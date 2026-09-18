@@ -7,6 +7,8 @@ import { TransactionSchema, Transaction } from '@/types'
 import type { z } from 'zod'
 import { createTransaction, updateTransaction } from '@/app/dashboard/transactions/actions'
 import { useRouter } from 'next/navigation'
+import { TasksDiffModal } from './TasksDiffModal'
+import { diffTransactionTasks, applyTransactionTasksDiff } from '@/app/actions/tasks'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
 interface TransactionFormProps {
@@ -35,6 +37,10 @@ export function TransactionForm({ initialData }: TransactionFormProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [diffModalOpen, setDiffModalOpen] = useState(false)
+  const [taskDiff, setTaskDiff] = useState<any>(null)
+  const [pendingData, setPendingData] = useState<any>(null)
+  const [isApplyingDiff, setIsApplyingDiff] = useState(false)
 
   const {
     register,
@@ -51,10 +57,9 @@ export function TransactionForm({ initialData }: TransactionFormProps) {
     }
   })
 
-  const onSubmit = async (data: z.infer<typeof TransactionSchema>) => {
+  const executeSave = async (data: any, addedTasks?: any[], removedTaskIds?: string[]) => {
     setIsSubmitting(true)
     setError(null)
-    
     try {
       const response = initialData?.id 
         ? await updateTransaction(initialData.id, data)
@@ -62,17 +67,64 @@ export function TransactionForm({ initialData }: TransactionFormProps) {
         
       if (response.error) {
         setError(response.error)
-      } else {
-        router.push(`/dashboard/transactions/${response.data.id}`)
+        setIsSubmitting(false)
+        return
       }
+
+      if (initialData?.id && addedTasks && removedTaskIds) {
+        await applyTransactionTasksDiff(initialData.id, addedTasks, removedTaskIds)
+      }
+
+      router.push(`/dashboard/transactions/${response.data.id}`)
     } catch {
       setError('An unexpected error occurred.')
-    } finally {
       setIsSubmitting(false)
     }
   }
 
+  const onSubmit = async (data: z.infer<typeof TransactionSchema>) => {
+    if (!initialData?.id) {
+      // Creating new, just save it (Task generation will be a separate hook or action later, 
+      // but for this phase we focus on the edit diff rule).
+      return executeSave(data)
+    }
+
+    const sideChanged = initialData.transaction_side !== data.transaction_side
+    const propChanged = initialData.property_type !== data.property_type
+    const finChanged = initialData.financing_type !== data.financing_type
+
+    if (sideChanged || propChanged || finChanged) {
+      setIsSubmitting(true)
+      try {
+        const diff = await diffTransactionTasks(initialData.id, data.transaction_side, data.property_type, data.financing_type)
+        if (diff.added.length > 0 || diff.removed.length > 0) {
+          setTaskDiff(diff)
+          setPendingData(data)
+          setDiffModalOpen(true)
+          setIsSubmitting(false)
+          return
+        }
+      } catch (e) {
+        console.error('Diff error', e)
+        // If diff fails, fallback to normal save or show error
+      }
+    }
+
+    // No relevant changes or no diff found, save normally
+    return executeSave(data)
+  }
+  
+  const onConfirmDiff = async () => {
+    if (!pendingData || !taskDiff) return
+    setIsApplyingDiff(true)
+    const removedIds = taskDiff.removed.map((t: any) => t.id)
+    await executeSave(pendingData, taskDiff.added, removedIds)
+    setIsApplyingDiff(false)
+    setDiffModalOpen(false)
+  }
+
   return (
+    <>
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-4xl">
       {error && (
         <div className="bg-danger/10 border border-danger/20 text-danger p-4 rounded-md">
@@ -195,5 +247,17 @@ export function TransactionForm({ initialData }: TransactionFormProps) {
         </button>
       </div>
     </form>
+      <TasksDiffModal 
+        isOpen={diffModalOpen}
+        onClose={() => {
+          setDiffModalOpen(false)
+          setPendingData(null)
+          setTaskDiff(null)
+        }}
+        onConfirm={onConfirmDiff}
+        diff={taskDiff}
+        isApplying={isApplyingDiff}
+      />
+    </>
   )
 }

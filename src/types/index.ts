@@ -37,6 +37,7 @@ export const TransactionSchema = z.object({
   
   // Dates
   effective_date: z.string().optional().nullable(),
+  inspection_deadline: z.string().optional().nullable(),
   closing_date: z.string().optional().nullable(),
   
   // Misc
@@ -78,7 +79,7 @@ export const DeadlineChangeSchema = z.object({
 
 export type DeadlineChange = z.infer<typeof DeadlineChangeSchema>
 
-export const TaskStatusSchema = z.enum(['TODO', 'IN_PROGRESS', 'DONE'])
+export const TaskStatusSchema = z.enum(['PENDING', 'IN_PROGRESS', 'WAITING', 'COMPLETED', 'WAIVED'])
 
 export const TaskSchema = z.object({
   id: z.string().uuid().optional(),
@@ -86,11 +87,16 @@ export const TaskSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().optional().nullable(),
   due_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD').optional().nullable(),
-  status: TaskStatusSchema.default('TODO'),
+  status: TaskStatusSchema.default('PENDING'),
   assigned_to: z.string().uuid().optional().nullable(),
   waiting_on: z.string().optional().nullable(),
   category: z.string().optional().nullable(),
   related_date_id: z.string().uuid().optional().nullable(),
+  priority: z.string().default('MEDIUM'),
+  notes: z.string().optional().nullable(),
+  related_document_id: z.string().uuid().optional().nullable(),
+  completed_at: z.string().optional().nullable(),
+  completed_by: z.string().uuid().optional().nullable(),
 })
 
 export type Task = z.infer<typeof TaskSchema>
@@ -101,6 +107,8 @@ export const TaskTemplateSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional().nullable(),
   transaction_side: z.string().optional().nullable(),
+  condition_property_type: z.string().optional().nullable(),
+  condition_financing_type: z.string().optional().nullable(),
 })
 
 export type TaskTemplate = z.infer<typeof TaskTemplateSchema>
@@ -113,6 +121,46 @@ export const TaskTemplateItemSchema = z.object({
   category: z.string().optional().nullable(),
   relative_due_days: z.coerce.number().optional().nullable(),
   reference_date_type: z.string().optional().nullable(),
+  priority: z.string().default('MEDIUM'),
 })
 
 export type TaskTemplateItem = z.infer<typeof TaskTemplateItemSchema>
+
+
+// --- Communications & Templates ---
+export const EmailTemplateSchema = z.object({
+  id: z.string().uuid(),
+  org_id: z.string().uuid(),
+  name: z.string(),
+  subject_template: z.string(),
+  body_template: z.string(),
+  created_at: z.string(),
+});
+export type EmailTemplate = z.infer<typeof EmailTemplateSchema>;
+
+export const CommunicationLogTypeSchema = z.enum([
+  'Email Draft',
+  'Email Sent',
+  'Email Received',
+  'Call',
+  'SMS',
+  'Note',
+  'Follow-Up'
+]);
+export type CommunicationLogType = z.infer<typeof CommunicationLogTypeSchema>;
+
+export const CommunicationLogSchema = z.object({
+  id: z.string().uuid(),
+  transaction_id: z.string().uuid(),
+  type: CommunicationLogTypeSchema,
+  contact_id: z.string().uuid().nullable().optional(),
+  method: z.string().nullable().optional(),
+  subject: z.string().nullable().optional(),
+  summary: z.string(),
+  follow_up_date: z.string().nullable().optional(),
+  waiting_on: z.string().nullable().optional(),
+  user_id: z.string().uuid().nullable().optional(),
+  related_document_id: z.string().uuid().nullable().optional(),
+  created_at: z.string(),
+});
+export type CommunicationLog = z.infer<typeof CommunicationLogSchema>;
