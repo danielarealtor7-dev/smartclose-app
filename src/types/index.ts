@@ -43,6 +43,8 @@ export const TransactionSchema = z.object({
   // Misc
   notes: z.string().optional(),
   is_archived: z.boolean().default(false),
+  import_batch_id: z.string().uuid().nullable().optional(),
+  import_row_number: z.number().int().nullable().optional(),
 })
 
 export type Transaction = z.infer<typeof TransactionSchema>
@@ -164,3 +166,17 @@ export const CommunicationLogSchema = z.object({
   created_at: z.string(),
 });
 export type CommunicationLog = z.infer<typeof CommunicationLogSchema>;
+
+export const ImportBatchSchema = z.object({
+  id: z.string().uuid(),
+  org_id: z.string().uuid(),
+  filename: z.string(),
+  worksheet: z.string(),
+  total_rows: z.number().int(),
+  imported_rows: z.number().int(),
+  status: z.enum(['COMPLETED', 'UNDONE']),
+  created_by: z.string().uuid().nullable().optional(),
+  created_at: z.string()
+})
+
+export type ImportBatch = z.infer<typeof ImportBatchSchema>
