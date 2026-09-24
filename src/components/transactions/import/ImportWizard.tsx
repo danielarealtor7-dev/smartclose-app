@@ -64,7 +64,7 @@ export function ImportWizard() {
 
       const basicParsed: ProcessedRow[] = []
       
-      data.forEach((row: Record<string, unknown>, index: number) => {
+      data.forEach((row: any, index: number) => {
         const clientName = row['CLIENT NAME']?.toString().trim()
         const propertyAddress = row['PROPERTY ADDRESS']?.toString().trim()
         
@@ -151,8 +151,8 @@ export function ImportWizard() {
           propertyAddress: r.propertyAddress,
           effectiveDay: r.effectiveDay,
           closingDay: r.closingDay,
-          realtor: r.raw['REALTOR'],
-          loanType: r.raw['LOAN TYPE'],
+          realtor: r.raw['REALTOR']?.toString(),
+          loanType: r.raw['LOAN TYPE']?.toString(),
           ebba: r.raw['EBBA']?.toString(),
           contract: r.raw['CONTRACT']?.toString(),
           fhaVa: r.raw['FHA/VA']?.toString(),
@@ -174,7 +174,7 @@ export function ImportWizard() {
       })
 
       setResult({ success: true, count: response.importedCount })
-    } catch (err: unknown) {
+    } catch (err: any) {
       setResult({ success: false, count: 0, error: err.message })
     } finally {
       setIsSubmitting(false)
