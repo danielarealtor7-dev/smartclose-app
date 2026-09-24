@@ -13,7 +13,7 @@ export async function getUsers() {
 
   if (error) {
     console.error('Error fetching users:', error)
-    return { error: 'Failed to fetch users' }
+    return { error: `Failed to fetch users: ${error.message || JSON.stringify(error)}` }
   }
 
   return { users }
