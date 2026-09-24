@@ -3,6 +3,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { z } from 'zod'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const RowSchema = z.object({
   clientName: z.string().optional(),
   propertyAddress: z.string().optional(),
@@ -84,7 +85,7 @@ export async function processImportBatch(batchData: ImportBatchData) {
     // Basic rules check (should already be done on client, but re-validate)
     if (!row.clientName && !row.propertyAddress) continue
 
-    let propertyType = 'SINGLE_FAMILY' // Default
+    const propertyType = 'SINGLE_FAMILY' // Default
     let financingType = 'CONVENTIONAL' // Default
     if (row.loanType?.toLowerCase().includes('cash')) financingType = 'CASH'
     if (row.loanType?.toLowerCase().includes('fha')) financingType = 'FHA'

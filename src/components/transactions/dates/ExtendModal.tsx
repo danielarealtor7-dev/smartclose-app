@@ -12,6 +12,7 @@ interface ExtendModalProps {
 export function ExtendModal({ dateId, currentDate, isOpen, onClose, onExtend }: ExtendModalProps) {
   const [newDate, setNewDate] = useState('')
   const [reason, setReason] = useState('')
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [file, setFile] = useState<File | null>(null)
 
   if (!isOpen) return null

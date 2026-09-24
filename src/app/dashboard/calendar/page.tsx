@@ -13,7 +13,7 @@ import {
   isToday, 
   parseISO 
 } from 'date-fns'
-import { ChevronLeft, ChevronRight, Filter, Key, Home, AlertCircle } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Filter, Key, Home } from 'lucide-react'
 
 // Reuse similar mock data structure
 const MOCK_EVENTS = [

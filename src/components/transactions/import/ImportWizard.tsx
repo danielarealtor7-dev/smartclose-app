@@ -16,7 +16,7 @@ interface ProcessedRow {
   propertyAddress?: string
   effectiveDay?: string
   closingDay?: string
-  raw: any
+  raw: Record<string, unknown>
   classification: RowClassification
   reason?: string
 }
@@ -64,7 +64,7 @@ export function ImportWizard() {
 
       const basicParsed: ProcessedRow[] = []
       
-      data.forEach((row: any, index) => {
+      data.forEach((row: Record<string, unknown>, index: number) => {
         const clientName = row['CLIENT NAME']?.toString().trim()
         const propertyAddress = row['PROPERTY ADDRESS']?.toString().trim()
         
@@ -105,7 +105,7 @@ export function ImportWizard() {
 
       // Merge results
       const finalRows = basicParsed.map(r => {
-        const sr = serverResults.find((s: any) => s.index === r.index)
+        const sr = serverResults.find((s: Record<string, unknown>) => s.index === r.index)
         let classification: RowClassification = (sr?.classification as RowClassification) || 'New'
         let reason = sr?.reason || ''
 
@@ -174,7 +174,7 @@ export function ImportWizard() {
       })
 
       setResult({ success: true, count: response.importedCount })
-    } catch (err: any) {
+    } catch (err: unknown) {
       setResult({ success: false, count: 0, error: err.message })
     } finally {
       setIsSubmitting(false)
@@ -246,7 +246,7 @@ export function ImportWizard() {
 
             <div>
               <label className="block text-sm font-medium text-brand-black mb-1">Default Year</label>
-              <p className="text-xs text-gray-500 mb-2">If a date is missing the year (e.g. "Sep 15"), we will assume this year.</p>
+              <p className="text-xs text-gray-500 mb-2">If a date is missing the year (e.g. &quot;Sep 15&quot;), we will assume this year.</p>
               <input 
                 type="number" 
                 value={defaultYear}

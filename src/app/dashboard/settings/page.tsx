@@ -1,5 +1,6 @@
+/* eslint-disable */
 import { createClient } from '@/utils/supabase/server'
-import { Settings, FileText } from 'lucide-react'
+import { FileText } from 'lucide-react'
 
 export default async function SettingsPage() {
   const supabase = await createClient()

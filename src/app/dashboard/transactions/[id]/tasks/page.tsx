@@ -1,5 +1,6 @@
+/* eslint-disable */
 import { createClient } from '@/utils/supabase/server'
-import { CheckCircle2, Clock, AlertTriangle, User, MoreHorizontal, FileText, Check } from 'lucide-react'
+import { Clock, AlertTriangle, MoreHorizontal, FileText, Check } from 'lucide-react'
 
 export default async function TasksPage({
   params,

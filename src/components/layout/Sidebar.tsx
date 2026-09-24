@@ -8,7 +8,8 @@ import {
   FolderClosed, 
   Home, 
   Settings, 
-  Users
+  Users,
+  ShieldCheck
 } from 'lucide-react'
 
 const navigation = [
@@ -18,6 +19,7 @@ const navigation = [
   { name: 'Contacts', href: '/dashboard/contacts', icon: Users },
   { name: 'Templates', href: '/dashboard/templates', icon: Files },
   { name: 'Archive', href: '/dashboard/archive', icon: FolderClosed },
+  { name: 'Admin', href: '/dashboard/admin', icon: ShieldCheck },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
 
