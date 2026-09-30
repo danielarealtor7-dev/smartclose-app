@@ -2,7 +2,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { TransactionSchema, Transaction } from '@/types'
 import type { z } from 'zod'
@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation'
 import { TasksDiffModal } from './TasksDiffModal'
 import { diffTransactionTasks, applyTransactionTasksDiff } from '@/app/actions/tasks'
 import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ContactSelector } from './ContactSelector'
 
 interface TransactionFormProps {
   initialData?: Transaction
@@ -46,6 +47,7 @@ export function TransactionForm({ initialData }: TransactionFormProps) {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(TransactionSchema),
@@ -221,6 +223,59 @@ export function TransactionForm({ initialData }: TransactionFormProps) {
             <label className="block text-sm font-medium text-brand-black mb-1">Seller(s) Names</label>
             <input {...register('seller_names')} type="text" placeholder="Acme Corp" className="w-full rounded-md border border-gray-300 p-2 focus:ring-brand-gold focus:border-brand-gold min-h-[44px]" />
           </div>
+        </div>
+      </Accordion>
+
+      <Accordion title="Key Contacts (Agents, Lender, Inspector)" defaultOpen={false}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Controller
+            control={control}
+            name="buyer_agent_id"
+            render={({ field }) => (
+              <ContactSelector
+                label="Buyer's Agent (Realtor)"
+                roleType="REALTOR"
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="listing_agent_id"
+            render={({ field }) => (
+              <ContactSelector
+                label="Listing Agent"
+                roleType="REALTOR"
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="lender_id"
+            render={({ field }) => (
+              <ContactSelector
+                label="Lender"
+                roleType="LENDER"
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="inspector_id"
+            render={({ field }) => (
+              <ContactSelector
+                label="Inspector"
+                roleType="INSPECTOR"
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
         </div>
       </Accordion>
       

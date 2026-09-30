@@ -4,7 +4,7 @@ drop table if exists public.dates_and_contingencies;
 
 -- Create transaction_dates table
 create table public.transaction_dates (
-    id uuid default uuid_generate_v4() primary key,
+    id uuid default gen_random_uuid() primary key,
     transaction_id uuid references public.transactions(id) on delete cascade not null,
     name text not null,
     type text not null,
@@ -23,7 +23,7 @@ create table public.transaction_dates (
 
 -- Create deadline_changes table for tracking extensions
 create table public.deadline_changes (
-    id uuid default uuid_generate_v4() primary key,
+    id uuid default gen_random_uuid() primary key,
     transaction_date_id uuid references public.transaction_dates(id) on delete cascade not null,
     old_date date not null,
     new_date date not null,

@@ -34,6 +34,7 @@ export const TransactionSchema = z.object({
   lender_id: z.string().uuid().nullable().optional(),
   title_company_id: z.string().uuid().nullable().optional(),
   assigned_tc_id: z.string().uuid().nullable().optional(),
+  inspector_id: z.string().uuid().nullable().optional(),
   
   // Dates
   effective_date: z.string().optional().nullable(),

@@ -2,7 +2,7 @@
 
 -- 1. Create email_templates table
 CREATE TABLE public.email_templates (
-    id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     org_id uuid REFERENCES public.organizations(id) ON DELETE CASCADE NOT NULL,
     name text NOT NULL,
     subject_template text NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE public.email_templates (
 
 -- 2. Create communication_logs table
 CREATE TABLE public.communication_logs (
-    id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     transaction_id uuid REFERENCES public.transactions(id) ON DELETE CASCADE NOT NULL,
     type text NOT NULL, -- 'Email Draft', 'Email Sent', 'Call', 'SMS', 'Note', 'Follow-Up'
     contact_id uuid, -- Reference to a future contacts table if applicable

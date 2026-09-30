@@ -1,7 +1,7 @@
 -- Migration: Excel Importer Tables
 
 CREATE TABLE public.import_batches (
-    id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     org_id uuid REFERENCES public.organizations(id) ON DELETE CASCADE NOT NULL,
     filename text NOT NULL,
     worksheet text NOT NULL,

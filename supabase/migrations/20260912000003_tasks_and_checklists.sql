@@ -2,7 +2,7 @@
 
 -- 1. Create Task Templates Table
 create table public.task_templates (
-    id uuid default uuid_generate_v4() primary key,
+    id uuid default gen_random_uuid() primary key,
     org_id uuid references public.organizations(id) on delete cascade not null,
     name text not null,
     description text,
@@ -12,7 +12,7 @@ create table public.task_templates (
 
 -- 2. Create Task Template Items
 create table public.task_template_items (
-    id uuid default uuid_generate_v4() primary key,
+    id uuid default gen_random_uuid() primary key,
     template_id uuid references public.task_templates(id) on delete cascade not null,
     title text not null,
     description text,

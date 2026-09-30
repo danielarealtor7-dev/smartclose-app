@@ -10,8 +10,7 @@ import {
   endOfMonth, 
   eachDayOfInterval, 
   isSameMonth, 
-  isToday, 
-  parseISO 
+  isToday
 } from 'date-fns'
 import { ChevronLeft, ChevronRight, Filter, Key, Home } from 'lucide-react'
 

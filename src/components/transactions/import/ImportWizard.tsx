@@ -64,6 +64,7 @@ export function ImportWizard() {
 
       const basicParsed: ProcessedRow[] = []
       
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data.forEach((row: any, index: number) => {
         const clientName = row['CLIENT NAME']?.toString().trim()
         const propertyAddress = row['PROPERTY ADDRESS']?.toString().trim()
@@ -174,6 +175,7 @@ export function ImportWizard() {
       })
 
       setResult({ success: true, count: response.importedCount })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setResult({ success: false, count: 0, error: err.message })
     } finally {

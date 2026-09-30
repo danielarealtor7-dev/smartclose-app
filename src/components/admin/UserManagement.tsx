@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { updateUserRole } from '@/app/actions/admin'
-import { ShieldCheck, User } from 'lucide-react'
+import { User } from 'lucide-react'
 
 type UserData = {
   id: string
@@ -27,7 +27,7 @@ export function UserManagement({ initialUsers }: { initialUsers: UserData[] }) {
       } else {
         setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u))
       }
-    } catch (err) {
+    } catch (err) { // eslint-disable-line @typescript-eslint/no-unused-vars
       setError('An unexpected error occurred')
     } finally {
       setLoadingId(null)

@@ -3,14 +3,14 @@ create extension if not exists "uuid-ossp";
 
 -- 1. Organizations
 create table public.organizations (
-    id uuid default uuid_generate_v4() primary key,
+    id uuid default gen_random_uuid() primary key,
     name text not null,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
 -- 2. Users
 create table public.users (
-    id uuid default uuid_generate_v4() primary key,
+    id uuid default gen_random_uuid() primary key,
     org_id uuid references public.organizations(id) on delete cascade not null,
     auth_id uuid references auth.users(id) on delete cascade not null,
     email text not null,
@@ -21,7 +21,7 @@ create table public.users (
 
 -- 3. Transactions
 create table public.transactions (
-    id uuid default uuid_generate_v4() primary key,
+    id uuid default gen_random_uuid() primary key,
     org_id uuid references public.organizations(id) on delete cascade not null,
     property_address text not null,
     status text not null check (status in ('ACTIVE', 'PENDING', 'CLOSED', 'CANCELLED')),
@@ -33,7 +33,7 @@ create table public.transactions (
 
 -- 4. Contacts
 create table public.contacts (
-    id uuid default uuid_generate_v4() primary key,
+    id uuid default gen_random_uuid() primary key,
     org_id uuid references public.organizations(id) on delete cascade not null,
     first_name text not null,
     last_name text not null,
@@ -53,7 +53,7 @@ create table public.transaction_contacts (
 
 -- 6. Dates and Contingencies
 create table public.dates_and_contingencies (
-    id uuid default uuid_generate_v4() primary key,
+    id uuid default gen_random_uuid() primary key,
     transaction_id uuid references public.transactions(id) on delete cascade not null,
     title text not null,
     date_value_est date,
@@ -65,7 +65,7 @@ create table public.dates_and_contingencies (
 
 -- 7. Date Audit Logs
 create table public.date_audit_logs (
-    id uuid default uuid_generate_v4() primary key,
+    id uuid default gen_random_uuid() primary key,
     contingency_id uuid references public.dates_and_contingencies(id) on delete cascade not null,
     old_date date,
     new_date date,
@@ -75,7 +75,7 @@ create table public.date_audit_logs (
 
 -- 8. Tasks
 create table public.tasks (
-    id uuid default uuid_generate_v4() primary key,
+    id uuid default gen_random_uuid() primary key,
     transaction_id uuid references public.transactions(id) on delete cascade not null,
     title text not null,
     due_date date,
@@ -86,7 +86,7 @@ create table public.tasks (
 
 -- 9. Documents
 create table public.documents (
-    id uuid default uuid_generate_v4() primary key,
+    id uuid default gen_random_uuid() primary key,
     transaction_id uuid references public.transactions(id) on delete cascade not null,
     file_path text not null,
     file_name text not null,

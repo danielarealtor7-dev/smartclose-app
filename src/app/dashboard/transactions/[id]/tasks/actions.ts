@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { TaskSchema, TaskStatusSchema, type Task } from '@/types'
+import { TaskSchema, TaskStatusSchema } from '@/types'
 
 // MOCK actions for Tasks and Checklists
 
@@ -21,6 +21,7 @@ export async function updateTaskStatus(taskId: string, status: string, transacti
   return { success: true }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function applyTemplateToTransaction(templateId: string, transactionId: string, referenceDates: Record<string, string>) {
   // 1. Fetch template items
   // 2. Map over items:
