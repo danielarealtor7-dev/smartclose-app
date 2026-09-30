@@ -18,6 +18,25 @@ interface CommunicationPageProps {
 export function CommunicationTab({ transaction, templates, logs }: CommunicationPageProps) {
   const [activeTab, setActiveTab] = useState<'log' | 'compose'>('log')
 
+  // Extract contacts from transaction
+  const tx: any = transaction || {};
+  const additionalData = {
+    realtor_name: tx.buyer_agent?.first_name ? `${tx.buyer_agent.first_name} ${tx.buyer_agent.last_name}` : 
+                 (tx.listing_agent?.first_name ? `${tx.listing_agent.first_name} ${tx.listing_agent.last_name}` : ''),
+    title_contact: tx.escrow_agent?.first_name ? `${tx.escrow_agent.first_name} ${tx.escrow_agent.last_name}` : '',
+    title_company: tx.title_company?.first_name ? `${tx.title_company.first_name} ${tx.title_company.last_name}` : '',
+    lender_name: tx.lender?.first_name ? `${tx.lender.first_name} ${tx.lender.last_name}` : '',
+    tc_name: tx.assigned_tc?.name || 'Transaction Coordinator',
+  }
+  
+  const recipientOptions = [
+    tx.buyer_agent?.email,
+    tx.listing_agent?.email,
+    tx.escrow_agent?.email,
+    tx.lender?.email,
+    tx.title_company?.email,
+  ].filter(Boolean) as string[];
+
   const getLogIcon = (type: string) => {
     switch (type) {
       case 'Email Draft':
@@ -85,6 +104,8 @@ export function CommunicationTab({ transaction, templates, logs }: Communication
             <EmailComposer 
               transaction={transaction} 
               templates={templates} 
+              additionalData={additionalData}
+              recipientOptions={recipientOptions}
               onSuccess={() => setActiveTab('log')}
             />
           ) : (

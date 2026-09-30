@@ -10,25 +10,19 @@ import { createCommunicationLog } from '@/app/actions/communications'
 interface EmailComposerProps {
   transaction: Transaction
   templates: EmailTemplate[]
+  additionalData?: Record<string, string>
+  recipientOptions?: string[]
   onSuccess?: () => void
 }
 
-export function EmailComposer({ transaction, templates, onSuccess }: EmailComposerProps) {
+export function EmailComposer({ transaction, templates, additionalData = {}, recipientOptions = [], onSuccess }: EmailComposerProps) {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('')
   const [subject, setSubject] = useState('')
   const [body, setBody] = useState('')
   const [missingVars, setMissingVars] = useState<string[]>([])
-  const [recipient, setRecipient] = useState('')
+  const [recipient, setRecipient] = useState(recipientOptions.length > 0 ? recipientOptions[0] : '')
   const [isSaving, setIsSaving] = useState(false)
   const [copied, setCopied] = useState(false)
-
-  // Example contacts (In reality, we would pass these as props or fetch them)
-  const [additionalData] = useState({
-    tc_name: 'Sarah Coordinator', // Logged in user mock
-    title_contact: 'Title Agent',
-    title_company: 'Secure Title LLC',
-    lender_name: 'Mortgage Corp',
-  })
 
   useEffect(() => {
     const isMounted = true;
@@ -145,18 +139,24 @@ export function EmailComposer({ transaction, templates, onSuccess }: EmailCompos
           </div>
         )}
 
-        {/* Recipient Suggestion (Mock for now, would use contacts) */}
+        {/* Recipient Suggestion */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
             <Users className="w-4 h-4" /> Recipient
           </label>
           <input 
             type="text" 
+            list="recipient-options"
             placeholder="e.g. buyer@example.com, agent@example.com"
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-gold focus:ring-1 focus:ring-brand-gold"
             value={recipient}
             onChange={(e) => setRecipient(e.target.value)}
           />
+          <datalist id="recipient-options">
+            {recipientOptions.map(opt => (
+              <option key={opt} value={opt} />
+            ))}
+          </datalist>
         </div>
 
         {/* Subject */}
