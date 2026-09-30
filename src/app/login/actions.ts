@@ -23,7 +23,7 @@ export async function login(formData: FormData) {
     if (error.message.includes('Invalid login credentials')) {
       redirect('/login?error=invalid_credentials')
     }
-    redirect('/login?error=connection_error')
+    redirect(`/login?error=connection_error&message=${encodeURIComponent(error.message)}`)
   }
 
   revalidatePath('/', 'layout')

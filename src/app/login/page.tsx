@@ -6,7 +6,12 @@ function LoginStates({ searchParams }: { searchParams: { error?: string, message
     return <div className="mb-4 rounded-md bg-danger/10 p-3 text-sm text-danger border border-danger/20">Invalid email or password.</div>
   }
   if (searchParams.error === 'connection_error') {
-    return <div className="mb-4 rounded-md bg-danger/10 p-3 text-sm text-danger border border-danger/20">A connection error occurred. Please try again.</div>
+    return (
+      <div className="mb-4 rounded-md bg-danger/10 p-3 text-sm text-danger border border-danger/20">
+        A connection error occurred. Please try again.
+        {searchParams.message && <div className="mt-1 text-xs opacity-80">{searchParams.message}</div>}
+      </div>
+    )
   }
   if (searchParams.error === 'session_expired') {
     return <div className="mb-4 rounded-md bg-yellow-500/10 p-3 text-sm text-yellow-700 border border-yellow-500/20">Your session has expired. Please log in again.</div>
