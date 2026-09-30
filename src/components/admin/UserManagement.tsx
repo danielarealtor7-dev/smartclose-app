@@ -67,19 +67,31 @@ export function UserManagement({ initialUsers }: { initialUsers: UserData[] }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Invite New User</h3>
-            <form onSubmit={(e) => {
+            <form onSubmit={async (e) => {
               e.preventDefault()
-              alert('User invitation sent! (Mock implementation)')
-              setIsInviteModalOpen(false)
+              setError(null)
+              const form = e.currentTarget
+              const email = (form.elements.namedItem('email') as HTMLInputElement).value
+              const role = (form.elements.namedItem('role') as HTMLSelectElement).value
+              
+              const { inviteUser } = await import('@/app/actions/admin')
+              const res = await inviteUser(email, role)
+              
+              if (res.success) {
+                alert('User invitation sent successfully!')
+                setIsInviteModalOpen(false)
+              } else {
+                alert(`Error: ${res.error}`)
+              }
             }}>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                  <input type="email" required className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-gold focus:border-brand-gold" />
+                  <input type="email" name="email" required className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-gold focus:border-brand-gold" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-gold focus:border-brand-gold">
+                  <select name="role" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-gold focus:border-brand-gold">
                     <option value="AGENT">AGENT</option>
                     <option value="ADMIN">ADMIN</option>
                     <option value="ASSISTANT">ASSISTANT</option>

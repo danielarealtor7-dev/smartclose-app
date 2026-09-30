@@ -58,3 +58,60 @@ export async function getOrgStats() {
     totalContacts: totalContacts || 0
   }
 }
+
+export async function inviteUser(email: string, role: string) {
+  try {
+    const supabase = await createClient()
+    
+    // Get the current user's org
+    const { data: userData } = await supabase.auth.getUser()
+    if (!userData?.user) return { error: 'Not authenticated' }
+
+    const { data: profile } = await supabase
+      .from('users')
+      .select('org_id')
+      .eq('auth_id', userData.user.id)
+      .single()
+
+    if (!profile?.org_id) return { error: 'No organization found' }
+
+    // Dynamic import to avoid errors if the file is imported elsewhere
+    const { createAdminClient } = await import('@/utils/supabase/admin')
+    const adminClient = createAdminClient()
+
+    // 1. Invite the user via Supabase Auth
+    const { data: inviteData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
+      data: { role: role, org_id: profile.org_id } // Store in raw_user_meta_data
+    })
+
+    if (inviteError) {
+      console.error('Error sending invite:', inviteError)
+      return { error: `Failed to send invite: ${inviteError.message}` }
+    }
+
+    // 2. We can optionally pre-create their record in the 'users' table or let a DB trigger do it
+    // Usually, a trigger on auth.users handles creation in public.users, but if it doesn't map correctly,
+    // we should ensure they are in the public.users table.
+    
+    // The auth.users trigger usually creates the public.user record. 
+    // Wait, let's update their role in public.users explicitly if the trigger already ran, 
+    // or insert it if the trigger doesn't exist for invites.
+    const { error: upsertError } = await adminClient
+      .from('users')
+      .upsert({
+        auth_id: inviteData.user.id,
+        org_id: profile.org_id,
+        role: role,
+        email: email
+      }, { onConflict: 'auth_id' })
+
+    if (upsertError) {
+      console.error('Error linking user record:', upsertError)
+    }
+
+    revalidatePath('/dashboard/admin')
+    return { success: true }
+  } catch (err: any) {
+    return { error: err.message || 'An unexpected error occurred.' }
+  }
+}
