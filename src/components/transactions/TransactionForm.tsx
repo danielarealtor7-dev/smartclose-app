@@ -179,6 +179,19 @@ export function TransactionForm({ initialData }: TransactionFormProps) {
         </div>
       </Accordion>
 
+      <Accordion title="Clients (Buyers / Sellers)" defaultOpen={false}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-brand-black mb-1">Buyer(s) Names</label>
+            <input {...register('buyer_names')} type="text" placeholder="John Doe, Jane Doe" className="w-full rounded-md border border-gray-300 p-2 focus:ring-brand-gold focus:border-brand-gold min-h-[44px]" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-brand-black mb-1">Seller(s) Names</label>
+            <input {...register('seller_names')} type="text" placeholder="Acme Corp" className="w-full rounded-md border border-gray-300 p-2 focus:ring-brand-gold focus:border-brand-gold min-h-[44px]" />
+          </div>
+        </div>
+      </Accordion>
+
       <Accordion title="Financials & Dates" defaultOpen={true}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -224,20 +237,7 @@ export function TransactionForm({ initialData }: TransactionFormProps) {
         </div>
       </Accordion>
 
-      <Accordion title="Clients (Buyers / Sellers)" defaultOpen={false}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-brand-black mb-1">Buyer(s) Names</label>
-            <input {...register('buyer_names')} type="text" placeholder="John Doe, Jane Doe" className="w-full rounded-md border border-gray-300 p-2 focus:ring-brand-gold focus:border-brand-gold min-h-[44px]" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-brand-black mb-1">Seller(s) Names</label>
-            <input {...register('seller_names')} type="text" placeholder="Acme Corp" className="w-full rounded-md border border-gray-300 p-2 focus:ring-brand-gold focus:border-brand-gold min-h-[44px]" />
-          </div>
-        </div>
-      </Accordion>
-
-      <Accordion title="Key Contacts (Agents, Lender, Inspector)" defaultOpen={false}>
+      <Accordion title="Key Contacts (Agents, Inspector)" defaultOpen={false}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Controller
             control={control}
