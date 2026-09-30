@@ -1,35 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { CheckCircle2, Clock, AlertTriangle, ArrowRight } from 'lucide-react'
+import { CheckCircle2, Clock, AlertTriangle, ArrowRight, Loader2 } from 'lucide-react'
 import { categorizeUrgency, type UrgencyCategory } from '@/utils/dates'
 
-type DashboardItem = {
-  id: string
-  transactionId: string
-  address: string
-  client: string
-  title: string
-  dueDate: string
-  type: string
-  responsible: string
-  waitingOn?: string
-  status: 'PENDING' | 'COMPLETED' | 'WAIVED'
-  isClosing: boolean
-  isFollowUp: boolean
-}
-
-// Complex mock data demonstrating deduplication
-const MOCK_ITEMS: DashboardItem[] = [
-  { id: '1', transactionId: 'tx-1', address: '123 Pine St', client: 'John Doe', title: 'Earnest Money Deposit', dueDate: '2026-09-08', type: 'EMD', responsible: 'Buyer Agent', status: 'PENDING', isClosing: false, isFollowUp: false }, // Overdue
-  { id: '2', transactionId: 'tx-1', address: '123 Pine St', client: 'John Doe', title: 'Follow-up with Lender', dueDate: '2026-09-10', type: 'FOLLOW_UP', responsible: 'Daniela (TC)', waitingOn: 'Lender', status: 'PENDING', isClosing: false, isFollowUp: true }, // Overdue
-  { id: '3', transactionId: 'tx-2', address: '456 Oak Ave', client: 'Jane Smith', title: 'Inspection Deadline', dueDate: '2026-09-11', type: 'INSPECTION', responsible: 'Buyer', status: 'PENDING', isClosing: false, isFollowUp: false }, // Due Today
-  { id: '4', transactionId: 'tx-3', address: '789 Maple Rd', client: 'Bob Lee', title: 'Closing', dueDate: '2026-09-11', type: 'CLOSING', responsible: 'Title Co', status: 'PENDING', isClosing: true, isFollowUp: false }, // Due Today AND Closing
-  { id: '5', transactionId: 'tx-4', address: '321 Elm St', client: 'Alice Brown', title: 'Appraisal Contingency', dueDate: '2026-09-13', type: 'APPRAISAL', responsible: 'Lender', status: 'PENDING', isClosing: false, isFollowUp: false }, // Next 3 Days
-  { id: '6', transactionId: 'tx-4', address: '321 Elm St', client: 'Alice Brown', title: 'Closing', dueDate: '2026-09-15', type: 'CLOSING', responsible: 'Title Co', status: 'PENDING', isClosing: true, isFollowUp: false }, // Closing This Week (Next 7 Days)
-  { id: '7', transactionId: 'tx-5', address: '999 Birch Dr', client: 'Tom White', title: 'HOA Approval', dueDate: '2026-09-17', type: 'HOA', responsible: 'Buyer', waitingOn: 'HOA Board', status: 'PENDING', isClosing: false, isFollowUp: false }, // Next 7 Days + Waiting On
-]
+import { getTodayDashboardItems, type DashboardItem } from '@/app/actions/dashboard'
 
 const CATEGORY_TITLES: Record<UrgencyCategory, string> = {
   OVERDUE: 'Overdue',
@@ -40,7 +16,18 @@ const CATEGORY_TITLES: Record<UrgencyCategory, string> = {
 }
 
 export default function TodayDashboard() {
-  const [items, setItems] = useState<DashboardItem[]>(MOCK_ITEMS)
+  const [items, setItems] = useState<DashboardItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true)
+      const data = await getTodayDashboardItems()
+      setItems(data)
+      setIsLoading(false)
+    }
+    loadData()
+  }, [])
 
   // We only care about pending items for the active dashboard
   const pendingItems = items.filter(i => i.status === 'PENDING')
@@ -136,9 +123,12 @@ export default function TodayDashboard() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-12">
-      <div>
-        <h1 className="text-2xl font-bold text-brand-black">Today</h1>
-        <p className="text-text-muted mt-1">Here is your priority list for {new Date().toLocaleDateString('en-US', { timeZone: 'America/New_York', weekday: 'long', month: 'long', day: 'numeric' })}.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-brand-black">Today</h1>
+          <p className="text-text-muted mt-1">Here is your priority list for {new Date().toLocaleDateString('en-US', { timeZone: 'America/New_York', weekday: 'long', month: 'long', day: 'numeric' })}.</p>
+        </div>
+        {isLoading && <Loader2 className="w-6 h-6 text-brand-gold animate-spin" />}
       </div>
 
       <div className="space-y-6">
