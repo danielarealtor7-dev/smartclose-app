@@ -40,6 +40,7 @@ export async function getTodayDashboardItems() {
     .eq('status', 'TODO') // 'TODO' is the pending state in tasks table schema
 
   if (tasks) {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     tasks.forEach((t: any) => {
       if (t.due_date) {
         items.push({
@@ -72,6 +73,7 @@ export async function getTodayDashboardItems() {
     .eq('status', 'PENDING')
     
   if (dates) {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     dates.forEach((d: any) => {
       if (d.due_date) {
         items.push({
@@ -99,6 +101,7 @@ export async function getTodayDashboardItems() {
     .not('closing_date', 'is', null)
 
   if (closingTxs) {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     closingTxs.forEach((tx: any) => {
       if (tx.closing_date && tx.status !== 'CLOSED' && tx.status !== 'CANCELLED') {
         items.push({

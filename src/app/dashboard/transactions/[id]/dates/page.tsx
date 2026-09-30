@@ -1,54 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Plus, Check, X, Clock } from 'lucide-react'
 import { isOverdue } from '@/utils/dates'
 import type { TransactionDate } from '@/types'
 import { ExtendModal } from '@/components/transactions/dates/ExtendModal'
 import { DateForm } from '@/components/transactions/dates/DateForm'
 
-// Mock Data since DB is not available
-const MOCK_DATES: TransactionDate[] = [
-  {
-    id: 'd1',
-    transaction_id: 'mock-1',
-    name: 'Effective Date',
-    type: 'EFFECTIVE_DATE',
-    due_date: '2026-09-01',
-    original_date: '2026-09-01',
-    status: 'COMPLETED',
-  },
-  {
-    id: 'd2',
-    transaction_id: 'mock-1',
-    name: 'Earnest Money Deposit',
-    type: 'EMD',
-    due_date: '2026-09-04',
-    original_date: '2026-09-04',
-    status: 'COMPLETED',
-  },
-  {
-    id: 'd3',
-    transaction_id: 'mock-1',
-    name: 'Inspection Deadline',
-    type: 'INSPECTION',
-    due_date: '2026-09-10', // Past date, should be overdue
-    original_date: '2026-09-10',
-    status: 'PENDING',
-  },
-  {
-    id: 'd4',
-    transaction_id: 'mock-1',
-    name: 'Closing Date',
-    type: 'CLOSING',
-    due_date: '2026-09-30', // Future
-    original_date: '2026-09-30',
-    status: 'PENDING',
-  },
-]
+import { 
+  getTransactionDates, 
+  createTransactionDate, 
+  completeTransactionDate, 
+  waiveTransactionDate, 
+  extendTransactionDate 
+} from '@/app/actions/dates'
+import { useParams } from 'next/navigation'
 
 export default function TransactionDatesPage() {
-  const [dates, setDates] = useState<TransactionDate[]>(MOCK_DATES)
+  const params = useParams()
+  const transactionId = params.id as string
+
+  const [dates, setDates] = useState<TransactionDate[]>([])
   const [isAddFormOpen, setIsAddFormOpen] = useState(false)
   
   const [extendModalState, setExtendModalState] = useState<{ isOpen: boolean, dateId: string, currentDate: string }>({
@@ -57,36 +29,48 @@ export default function TransactionDatesPage() {
     currentDate: ''
   })
 
+  const loadDates = useCallback(async () => {
+    const data = await getTransactionDates(transactionId)
+    setDates(data as TransactionDate[])
+  }, [transactionId])
+
+  useEffect(() => {
+    let ignore = false
+    async function fetchDates() {
+      const data = await getTransactionDates(transactionId)
+      if (!ignore) {
+        setDates(data as TransactionDate[])
+      }
+    }
+    fetchDates()
+    return () => { ignore = true }
+  }, [transactionId])
+
   // Find Effective Date for the form calculator
   const effectiveDate = dates.find(d => d.type === 'EFFECTIVE_DATE')?.due_date
 
-  // Handlers for mock state changes
-  const handleAdd = (data: Record<string, unknown>) => {
-    const newId = `d${Date.now()}`
-    setDates(prev => [...prev, {
-      ...(data as Partial<TransactionDate>),
-      id: newId,
-      transaction_id: 'mock-1',
-      original_date: data.due_date as string,
-      status: 'PENDING'
-    } as TransactionDate])
+  const handleAdd = async (data: Record<string, unknown>) => {
+    await createTransactionDate(transactionId, data)
+    await loadDates()
   }
 
-  const handleComplete = (id: string) => {
-    setDates(prev => prev.map(d => d.id === id ? { ...d, status: 'COMPLETED' } : d))
+  const handleComplete = async (id: string) => {
+    await completeTransactionDate(id, transactionId)
+    await loadDates()
   }
   
-  const handleWaive = (id: string) => {
-    setDates(prev => prev.map(d => d.id === id ? { ...d, status: 'WAIVED' } : d))
+  const handleWaive = async (id: string) => {
+    await waiveTransactionDate(id, transactionId)
+    await loadDates()
   }
 
   const openExtendModal = (id: string, currentDate: string) => {
     setExtendModalState({ isOpen: true, dateId: id, currentDate })
   }
 
-  const handleExtend = (id: string, newDate: string, reason: string) => {
-    console.log('Extending with reason:', reason)
-    setDates(prev => prev.map(d => d.id === id ? { ...d, status: 'EXTENDED', due_date: newDate } : d))
+  const handleExtend = async (id: string, newDate: string, reason: string) => {
+    await extendTransactionDate(id, transactionId, newDate, reason)
+    await loadDates()
   }
 
   return (
