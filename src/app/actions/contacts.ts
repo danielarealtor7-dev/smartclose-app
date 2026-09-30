@@ -48,3 +48,19 @@ export async function createContact(contactData: { first_name: string, last_name
   revalidatePath('/dashboard/contacts')
   return { data, error: null }
 }
+export async function getAllContacts() {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { data: null, error: 'Unauthorized' }
+  const { data: userData } = await supabase.from('users').select('org_id').eq('auth_id', user.id).single()
+  if (!userData?.org_id) return { data: null, error: 'No org found' }
+
+  const { data, error } = await supabase
+    .from('contacts')
+    .select('*')
+    .eq('org_id', userData.org_id)
+    .order('first_name', { ascending: true })
+
+  return { data, error: error?.message }
+}
