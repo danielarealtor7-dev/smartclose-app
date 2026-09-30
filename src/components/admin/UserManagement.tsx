@@ -36,6 +36,8 @@ export function UserManagement({ initialUsers }: { initialUsers: UserData[] }) {
 
   const roleOptions = ['SUPER_ADMIN', 'ADMIN', 'AGENT', 'ASSISTANT']
 
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
+
   return (
     <div>
       <div className="sm:flex sm:items-center sm:justify-between mb-6">
@@ -45,9 +47,11 @@ export function UserManagement({ initialUsers }: { initialUsers: UserData[] }) {
             A list of all users in your organization including their name, role and email.
           </p>
         </div>
-        {/* Placeholder for future add user functionality */}
         <div className="mt-4 sm:mt-0">
-          <button className="bg-brand-black text-white px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-800 transition-colors">
+          <button 
+            onClick={() => setIsInviteModalOpen(true)}
+            className="bg-brand-black text-white px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-800 transition-colors"
+          >
             Invite User
           </button>
         </div>
@@ -56,6 +60,38 @@ export function UserManagement({ initialUsers }: { initialUsers: UserData[] }) {
       {error && (
         <div className="mb-4 p-4 text-sm text-red-700 bg-red-50 rounded-md">
           {error}
+        </div>
+      )}
+
+      {isInviteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Invite New User</h3>
+            <form onSubmit={(e) => {
+              e.preventDefault()
+              alert('User invitation sent! (Mock implementation)')
+              setIsInviteModalOpen(false)
+            }}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                  <input type="email" required className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-gold focus:border-brand-gold" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                  <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-gold focus:border-brand-gold">
+                    <option value="AGENT">AGENT</option>
+                    <option value="ADMIN">ADMIN</option>
+                    <option value="ASSISTANT">ASSISTANT</option>
+                  </select>
+                </div>
+              </div>
+              <div className="mt-6 flex justify-end gap-3">
+                <button type="button" onClick={() => setIsInviteModalOpen(false)} className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border rounded-md">Cancel</button>
+                <button type="submit" className="px-4 py-2 text-sm text-brand-black bg-brand-gold hover:bg-gold-hover rounded-md font-medium">Send Invite</button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

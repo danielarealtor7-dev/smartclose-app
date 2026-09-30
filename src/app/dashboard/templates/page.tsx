@@ -1,19 +1,17 @@
-import { EmptyState } from '@/components/ui/EmptyState'
-import { Files } from 'lucide-react'
+import { createClient } from '@/utils/supabase/server'
+import { TemplatesClient } from '@/components/templates/TemplatesClient'
 
-export default function TemplatesPage() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-brand-black tracking-tight">Email Templates</h1>
-        <p className="mt-1 text-sm text-text-muted">Manage standard email templates for your communications.</p>
-      </div>
-      <EmptyState 
-        title="No templates found"
-        description="Create email templates to speed up communication with clients and agents."
-        icon={Files}
-        actionLabel="Create Template"
-      />
-    </div>
-  )
+export default async function TemplatesPage() {
+  const supabase = await createClient()
+
+  const { data: userData } = await supabase.auth.getUser()
+  const { data: profile } = await supabase.from('users').select('org_id').eq('auth_id', userData?.user?.id).single()
+
+  let templates = []
+  if (profile?.org_id) {
+    const { data } = await supabase.from('email_templates').select('*').eq('org_id', profile.org_id).order('created_at')
+    if (data) templates = data
+  }
+
+  return <TemplatesClient initialTemplates={templates} />
 }
