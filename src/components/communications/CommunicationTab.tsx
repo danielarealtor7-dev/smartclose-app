@@ -19,7 +19,7 @@ export function CommunicationTab({ transaction, templates, logs }: Communication
   const [activeTab, setActiveTab] = useState<'log' | 'compose'>('log')
 
   // Extract contacts from transaction
-  const tx: any = transaction || {};
+  const tx: Record<string, any> = transaction || {};
   const additionalData = {
     realtor_name: tx.buyer_agent?.first_name ? `${tx.buyer_agent.first_name} ${tx.buyer_agent.last_name}` : 
                  (tx.listing_agent?.first_name ? `${tx.listing_agent.first_name} ${tx.listing_agent.last_name}` : ''),
