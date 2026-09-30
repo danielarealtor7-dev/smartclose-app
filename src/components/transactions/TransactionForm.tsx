@@ -201,7 +201,18 @@ export function TransactionForm({ initialData }: TransactionFormProps) {
               <option value="OTHER">Other</option>
             </select>
           </div>
-          <div></div>
+          <Controller
+            control={control}
+            name="lender_id"
+            render={({ field }) => (
+              <ContactSelector
+                label="Lender"
+                roleType="LENDER"
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
           <div>
             <label className="block text-sm font-medium text-brand-black mb-1">Effective Date</label>
             <input {...register('effective_date')} type="date" className="w-full rounded-md border border-gray-300 p-2 focus:ring-brand-gold focus:border-brand-gold min-h-[44px]" />
@@ -252,18 +263,7 @@ export function TransactionForm({ initialData }: TransactionFormProps) {
               />
             )}
           />
-          <Controller
-            control={control}
-            name="lender_id"
-            render={({ field }) => (
-              <ContactSelector
-                label="Lender"
-                roleType="LENDER"
-                value={field.value}
-                onChange={field.onChange}
-              />
-            )}
-          />
+
           <Controller
             control={control}
             name="inspector_id"
