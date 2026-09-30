@@ -115,3 +115,62 @@ export async function inviteUser(email: string, role: string) {
     return { error: err.message || 'An unexpected error occurred.' }
   }
 }
+
+export async function generateWhatsAppInvite(email: string, role: string) {
+  try {
+    const supabase = await createClient()
+    
+    // Get the current user's org
+    const { data: userData } = await supabase.auth.getUser()
+    if (!userData?.user) return { error: 'Not authenticated' }
+
+    const { data: profile } = await supabase
+      .from('users')
+      .select('org_id')
+      .eq('auth_id', userData.user.id)
+      .single()
+
+    if (!profile?.org_id) return { error: 'No organization found' }
+
+    const { createAdminClient } = await import('@/utils/supabase/admin')
+    const adminClient = createAdminClient()
+
+    // 1. Generate the invite link via Supabase Auth
+    // This creates the user in auth.users but does NOT send an email
+    const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
+      type: 'invite',
+      email: email,
+      options: {
+        data: { role: role, org_id: profile.org_id }
+      }
+    })
+
+    if (linkError) {
+      console.error('Error generating link:', linkError)
+      return { error: `Failed to generate link: ${linkError.message}` }
+    }
+
+    // 2. Insert into our users table
+    const { error: upsertError } = await adminClient
+      .from('users')
+      .upsert({
+        auth_id: linkData.user.id,
+        org_id: profile.org_id,
+        role: role,
+        email: email
+      }, { onConflict: 'auth_id' })
+
+    if (upsertError) {
+      console.error('Error linking user record:', upsertError)
+    }
+
+    revalidatePath('/dashboard/admin')
+    
+    return { 
+      success: true, 
+      link: linkData.properties?.action_link || '' 
+    }
+  } catch (err: any) {
+    return { error: err.message || 'An unexpected error occurred.' }
+  }
+}

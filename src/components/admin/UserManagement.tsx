@@ -66,19 +66,30 @@ export function UserManagement({ initialUsers }: { initialUsers: UserData[] }) {
       {isInviteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Invite New User</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Invite New User (WhatsApp)</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              A secure invite link will be generated. You can then send it directly to their WhatsApp.
+            </p>
             <form onSubmit={async (e) => {
               e.preventDefault()
               setError(null)
               const form = e.currentTarget
               const email = (form.elements.namedItem('email') as HTMLInputElement).value
+              const phone = (form.elements.namedItem('phone') as HTMLInputElement).value
               const role = (form.elements.namedItem('role') as HTMLSelectElement).value
               
-              const { inviteUser } = await import('@/app/actions/admin')
-              const res = await inviteUser(email, role)
+              const { generateWhatsAppInvite } = await import('@/app/actions/admin')
+              const res = await generateWhatsAppInvite(email, role)
               
-              if (res.success) {
-                alert('User invitation sent successfully!')
+              if (res.success && res.link) {
+                // Generate WhatsApp Web URL
+                const message = `¡Hola! Te invito a unirte a mi equipo en SmartClose. Aquí tienes tu enlace de acceso seguro:\n\n${res.link}\n\nPor favor, haz clic en el enlace para establecer tu contraseña y acceder al sistema.`
+                const waUrl = `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`
+                
+                // Open WhatsApp Web
+                window.open(waUrl, '_blank')
+                
+                alert('¡Enlace generado exitosamente! Se ha abierto WhatsApp Web para enviar la invitación.')
                 setIsInviteModalOpen(false)
               } else {
                 alert(`Error: ${res.error}`)
@@ -86,8 +97,12 @@ export function UserManagement({ initialUsers }: { initialUsers: UserData[] }) {
             }}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email Address (Required for login)</label>
                   <input type="email" name="email" required className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-gold focus:border-brand-gold" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp Number (Including country code)</label>
+                  <input type="tel" name="phone" placeholder="+1234567890" required className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-gold focus:border-brand-gold" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
@@ -100,7 +115,9 @@ export function UserManagement({ initialUsers }: { initialUsers: UserData[] }) {
               </div>
               <div className="mt-6 flex justify-end gap-3">
                 <button type="button" onClick={() => setIsInviteModalOpen(false)} className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border rounded-md">Cancel</button>
-                <button type="submit" className="px-4 py-2 text-sm text-brand-black bg-brand-gold hover:bg-gold-hover rounded-md font-medium">Send Invite</button>
+                <button type="submit" className="px-4 py-2 text-sm text-brand-black bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-md font-medium flex items-center gap-2">
+                  Generate & Open WhatsApp
+                </button>
               </div>
             </form>
           </div>
