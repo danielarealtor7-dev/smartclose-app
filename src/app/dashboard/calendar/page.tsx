@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { 
   format, 
@@ -12,20 +12,24 @@ import {
   isSameMonth, 
   isToday
 } from 'date-fns'
-import { ChevronLeft, ChevronRight, Filter, Key, Home } from 'lucide-react'
-
-// Reuse similar mock data structure
-const MOCK_EVENTS = [
-  { id: '1', date: '2026-09-11', title: 'Earnest Money Deposit', txId: 'tx-1', type: 'EMD', isClosing: false },
-  { id: '2', date: '2026-09-11', title: 'Inspection', txId: 'tx-2', type: 'INSPECTION', isClosing: false },
-  { id: '3', date: '2026-09-15', title: 'Closing - 123 Pine St', txId: 'tx-1', type: 'CLOSING', isClosing: true },
-  { id: '4', date: '2026-09-20', title: 'HOA Approval', txId: 'tx-3', type: 'HOA', isClosing: false },
-  { id: '5', date: '2026-09-30', title: 'Closing - 456 Oak', txId: 'tx-2', type: 'CLOSING', isClosing: true },
-]
+import { ChevronLeft, ChevronRight, Filter, Key, Home, Loader2 } from 'lucide-react'
+import { getCalendarEvents, CalendarEvent } from '@/app/actions/calendar'
 
 export default function CalendarPage() {
-  const [currentDate, setCurrentDate] = useState(new Date('2026-09-01T12:00:00Z')) // Fixed anchor for mock
+  const [currentDate, setCurrentDate] = useState(new Date())
   const [view, setView] = useState<'month' | 'list'>('month')
+  const [events, setEvents] = useState<CalendarEvent[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadEvents() {
+      setIsLoading(true)
+      const data = await getCalendarEvents()
+      setEvents(data)
+      setIsLoading(false)
+    }
+    loadEvents()
+  }, [])
 
   const monthStart = startOfMonth(currentDate)
   const monthEnd = endOfMonth(currentDate)
@@ -75,9 +79,12 @@ export default function CalendarPage() {
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex-1 flex flex-col">
         {/* Calendar Header */}
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-brand-black">
-            {format(currentDate, 'MMMM yyyy')}
-          </h2>
+          <div className="flex items-center gap-4">
+            <h2 className="text-xl font-semibold text-brand-black">
+              {format(currentDate, 'MMMM yyyy')}
+            </h2>
+            {isLoading && <Loader2 className="w-5 h-5 text-brand-gold animate-spin" />}
+          </div>
           <div className="flex items-center gap-2">
             <button onClick={handleToday} className="px-3 py-1.5 text-sm border rounded-md hover:bg-gray-50 font-medium text-brand-black">
               Today
@@ -105,7 +112,7 @@ export default function CalendarPage() {
             <div className="grid grid-cols-7 flex-1 auto-rows-fr">
               {calendarDays.map((day, idx) => {
                 const dayStr = format(day, 'yyyy-MM-dd')
-                const dayEvents = MOCK_EVENTS.filter(e => e.date === dayStr)
+                const dayEvents = events.filter(e => e.date === dayStr)
                 const isCurrentMonth = isSameMonth(day, currentDate)
                 const isTodayDate = isToday(day)
 
