@@ -30,6 +30,8 @@ export async function login(formData: FormData) {
   redirect('/dashboard')
 }
 
+import { headers } from 'next/headers'
+
 export async function forgotPassword(formData: FormData) {
   const supabase = await createClient()
   const email = formData.get('email') as string
@@ -38,8 +40,11 @@ export async function forgotPassword(formData: FormData) {
     redirect('/forgot-password?error=invalid_email')
   }
 
+  const originList = await headers()
+  const origin = originList.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/reset-password`,
+    redirectTo: `${origin}/reset-password`,
   })
 
   if (error) {
