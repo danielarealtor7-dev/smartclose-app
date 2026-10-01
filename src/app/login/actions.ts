@@ -40,15 +40,16 @@ export async function forgotPassword(formData: FormData) {
     redirect('/forgot-password?error=invalid_email')
   }
 
-  const originList = await headers()
-  const origin = originList.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const origin = process.env.NODE_ENV === 'development' 
+    ? 'http://localhost:3000' 
+    : 'https://app.smartclosetc.com'
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${origin}/reset-password`,
   })
 
   if (error) {
-    redirect('/forgot-password?error=connection_error')
+    redirect(`/forgot-password?error=connection_error&message=${encodeURIComponent(error.message)}`)
   }
 
   redirect('/forgot-password?message=recovery_sent')

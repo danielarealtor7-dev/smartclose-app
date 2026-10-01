@@ -10,7 +10,7 @@ interface RecoveryStatesProps {
 
 function RecoveryStates({ searchParams }: RecoveryStatesProps) {
   if (searchParams.error === 'connection_error') {
-    return <div className="mb-4 rounded-md bg-danger/10 p-3 text-sm text-danger border border-danger/20">A connection error occurred. Please try again.</div>
+    return <div className="mb-4 rounded-md bg-danger/10 p-3 text-sm text-danger border border-danger/20">{searchParams.message ? decodeURIComponent(searchParams.message) : 'A connection error occurred. Please try again.'}</div>
   }
   if (searchParams.error === 'invalid_email') {
     return <div className="mb-4 rounded-md bg-danger/10 p-3 text-sm text-danger border border-danger/20">Please enter a valid email address.</div>
