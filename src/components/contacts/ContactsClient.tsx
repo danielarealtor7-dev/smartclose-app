@@ -5,7 +5,16 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { Users, Mail, Phone, Plus } from 'lucide-react'
 import { ContactForm } from '@/components/contacts/ContactForm'
 
-export function ContactsClient({ initialContacts }: { initialContacts: any[] }) {
+interface ContactItem {
+  id: string
+  first_name: string
+  last_name?: string | null
+  role_type?: string | null
+  email?: string | null
+  phone?: string | null
+}
+
+export function ContactsClient({ initialContacts }: { initialContacts: ContactItem[] }) {
   const [showForm, setShowForm] = useState(false)
 
   return (

@@ -4,7 +4,16 @@ import { useState } from 'react'
 import { FileText, Plus, X } from 'lucide-react'
 import { createTaskTemplate } from '@/app/actions/settings'
 
-export function SettingsClient({ initialTemplates }: { initialTemplates: any[] }) {
+interface TemplateItem {
+  id: string
+  name: string
+  description?: string | null
+  transaction_side?: string | null
+  condition_financing_type?: string | null
+  condition_property_type?: string | null
+}
+
+export function SettingsClient({ initialTemplates }: { initialTemplates: TemplateItem[] }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -50,11 +59,11 @@ export function SettingsClient({ initialTemplates }: { initialTemplates: any[] }
         <div className="p-0">
           {initialTemplates.length === 0 ? (
             <div className="p-8 text-center text-text-muted">
-              No templates found. Click "New Template" to create one.
+              No templates found. Click &quot;New Template&quot; to create one.
             </div>
           ) : (
             <ul className="divide-y divide-gray-100">
-              {initialTemplates.map((t: any) => (
+              {initialTemplates.map((t) => (
                 <li key={t.id} className="p-6 hover:bg-gray-50 transition-colors">
                   <div className="flex items-start justify-between">
                     <div>

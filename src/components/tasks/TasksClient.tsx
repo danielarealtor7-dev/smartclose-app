@@ -3,8 +3,13 @@
 import { useState } from 'react'
 import { Clock, AlertTriangle, MoreHorizontal, FileText, Check } from 'lucide-react'
 import { TaskForm } from '@/components/tasks/TaskForm'
+import { Task } from '@/types'
 
-export function TasksClient({ transactionId, initialTasks }: { transactionId: string, initialTasks: any[] }) {
+interface TaskItem extends Task {
+  completed_by_user?: { name?: string | null } | null
+}
+
+export function TasksClient({ transactionId, initialTasks }: { transactionId: string, initialTasks: TaskItem[] }) {
   const [showForm, setShowForm] = useState(false)
 
   // Group tasks by category or status
@@ -30,7 +35,7 @@ export function TasksClient({ transactionId, initialTasks }: { transactionId: st
     }
   }
 
-  const renderTask = (task: any) => (
+  const renderTask = (task: TaskItem) => (
     <div key={task.id} className="flex flex-col sm:flex-row gap-4 p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 bg-white">
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-2">
@@ -47,7 +52,7 @@ export function TasksClient({ transactionId, initialTasks }: { transactionId: st
         </div>
         
         {task.description && <p className="text-sm text-gray-600 mb-2">{task.description}</p>}
-        {task.notes && <p className="text-sm text-gray-500 italic mb-2">"{task.notes}"</p>}
+        {task.notes && <p className="text-sm text-gray-500 italic mb-2">&ldquo;{task.notes}&rdquo;</p>}
         
         <div className="flex flex-wrap items-center gap-4 text-xs text-text-muted">
           {task.due_date && (

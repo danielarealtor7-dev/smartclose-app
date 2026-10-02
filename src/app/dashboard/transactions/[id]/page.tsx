@@ -36,8 +36,6 @@ export default async function TransactionOverviewPage({
     return `${m}/${day}/${y}`
   }
 
-  const contactName = (c: any) => c ? `${c.first_name} ${c.last_name}` : '—'
-
   const sideLabels: Record<string, string> = {
     BUYER: 'Buyer Side',
     LISTING: 'Listing Side',
@@ -142,7 +140,14 @@ function Row({ label, value, highlight }: { label: string; value: string; highli
   )
 }
 
-function ContactCard({ label, contact }: { label: string; contact: any }) {
+interface ContactInfo {
+  first_name?: string | null
+  last_name?: string | null
+  phone?: string | null
+  email?: string | null
+}
+
+function ContactCard({ label, contact }: { label: string; contact?: ContactInfo | null }) {
   return (
     <div className="border border-gray-100 rounded-md p-3 bg-gray-50/50">
       <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">{label}</p>

@@ -13,7 +13,7 @@ vi.mock('@/utils/supabase/server', () => ({
 test('LoginPage renders correctly', async () => {
   const ui = await LoginPage({ searchParams: Promise.resolve({}) })
   render(ui)
-  expect(screen.getByText('SmartClose TC')).toBeInTheDocument()
+  expect(screen.getByAltText('SmartClose TC')).toBeInTheDocument()
   expect(screen.getByLabelText('Email address')).toBeInTheDocument()
   expect(screen.getByLabelText('Password')).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument()

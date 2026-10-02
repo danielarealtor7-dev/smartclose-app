@@ -5,7 +5,14 @@ import { Files, Plus, X } from 'lucide-react'
 import { createEmailTemplate } from '@/app/actions/templates'
 import { EmptyState } from '@/components/ui/EmptyState'
 
-export function TemplatesClient({ initialTemplates }: { initialTemplates: any[] }) {
+interface EmailTemplateItem {
+  id: string
+  name: string
+  subject: string
+  body: string
+}
+
+export function TemplatesClient({ initialTemplates }: { initialTemplates: EmailTemplateItem[] }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -55,7 +62,7 @@ export function TemplatesClient({ initialTemplates }: { initialTemplates: any[] 
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {initialTemplates.map((t: any) => (
+          {initialTemplates.map((t) => (
             <div key={t.id} className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-all">
               <h3 className="font-semibold text-brand-black mb-2">{t.name}</h3>
               <p className="text-sm text-gray-600 mb-4 font-medium">Subject: {t.subject}</p>

@@ -27,7 +27,7 @@ export async function getTransactionDates(transactionId: string) {
     .eq('id', transactionId)
     .single()
 
-  const allDates = [...(data || [])]
+  const allDates: Array<Record<string, unknown>> = [...(data || [])]
 
   if (tx?.closing_date) {
     // Check if there is already a closing date in the transaction_dates table
@@ -40,7 +40,7 @@ export async function getTransactionDates(transactionId: string) {
         due_date: tx.closing_date,
         original_date: tx.closing_date,
         status: 'PENDING'
-      } as unknown as any)
+      })
     }
   }
 
@@ -54,7 +54,7 @@ export async function getTransactionDates(transactionId: string) {
         due_date: tx.effective_date,
         original_date: tx.effective_date,
         status: 'COMPLETED'
-      } as any)
+      })
     }
   }
 
@@ -124,6 +124,7 @@ export async function waiveTransactionDate(id: string, transactionId: string) {
 }
 
 export async function extendTransactionDate(id: string, transactionId: string, newDate: string, _reason: string) {
+  void _reason
   const supabase = await createClient()
 
   if (id.startsWith('virtual-')) {

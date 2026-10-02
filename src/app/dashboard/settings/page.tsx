@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { createClient } from '@/utils/supabase/server'
 import { SettingsClient } from '@/components/settings/SettingsClient'
 

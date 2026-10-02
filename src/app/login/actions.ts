@@ -30,8 +30,6 @@ export async function login(formData: FormData) {
   redirect('/dashboard')
 }
 
-import { headers } from 'next/headers'
-
 export async function forgotPassword(formData: FormData) {
   const supabase = await createClient()
   const email = formData.get('email') as string

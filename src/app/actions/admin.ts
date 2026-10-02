@@ -111,8 +111,9 @@ export async function inviteUser(email: string, role: string) {
 
     revalidatePath('/dashboard/admin')
     return { success: true }
-  } catch (err: any) {
-    return { error: err.message || 'An unexpected error occurred.' }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'An unexpected error occurred.'
+    return { error: message }
   }
 }
 
@@ -170,7 +171,8 @@ export async function generateWhatsAppInvite(email: string, role: string) {
       success: true, 
       link: linkData.properties?.action_link || '' 
     }
-  } catch (err: any) {
-    return { error: err.message || 'An unexpected error occurred.' }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'An unexpected error occurred.'
+    return { error: message }
   }
 }

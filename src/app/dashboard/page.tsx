@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
-import { LogOut, Home, FileText, Settings } from 'lucide-react'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
