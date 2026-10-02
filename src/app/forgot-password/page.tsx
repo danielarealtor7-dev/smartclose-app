@@ -36,7 +36,7 @@ export default async function ForgotPasswordPage({
       <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-10 shadow-sm border-t-4 border-brand-gold">
         <div className="text-center flex flex-col items-center">
           <Image
-            src="/images/LOGO.png"
+            src="/images/logo1.png"
             alt="SmartClose TC"
             width={180}
             height={60}

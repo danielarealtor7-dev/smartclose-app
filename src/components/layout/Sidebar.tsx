@@ -32,7 +32,7 @@ export function Sidebar() {
       <div className="flex flex-col flex-1 min-h-0 pt-5 pb-4">
         <div className="flex items-center flex-shrink-0 px-6 py-2">
           <Image
-            src="/images/LOGO.png"
+            src="/images/logo2.png"
             alt="SmartClose TC Logo"
             width={180}
             height={60}
