@@ -1,5 +1,6 @@
 import { forgotPassword } from '../login/actions'
 import { Suspense } from 'react'
+import Image from 'next/image'
 
 interface RecoveryStatesProps {
   searchParams: {
@@ -33,7 +34,15 @@ export default async function ForgotPasswordPage({
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg-soft p-4 font-sans">
       <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-10 shadow-sm border-t-4 border-brand-gold">
-        <div className="text-center">
+        <div className="text-center flex flex-col items-center">
+          <Image
+            src="/images/LOGO.png"
+            alt="SmartClose TC"
+            width={180}
+            height={60}
+            className="h-auto w-auto max-h-12 object-contain mb-4"
+            priority
+          />
           <h2 className="mt-2 text-2xl font-bold text-brand-black tracking-tight">
             Reset your password
           </h2>

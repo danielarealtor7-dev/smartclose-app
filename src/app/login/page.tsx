@@ -1,5 +1,6 @@
 import { login } from './actions'
 import { Suspense } from 'react'
+import Image from 'next/image'
 
 function LoginStates({ searchParams }: { searchParams: { error?: string, message?: string } }) {
   if (searchParams.error === 'invalid_credentials') {
@@ -36,11 +37,16 @@ export default async function LoginPage({
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg-soft p-4 font-sans">
       <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-10 shadow-sm border-t-4 border-brand-gold">
-        <div className="text-center">
-          <h2 className="mt-2 text-3xl font-bold text-brand-black tracking-tight">
-            SmartClose TC
-          </h2>
-          <p className="mt-2 text-sm text-text-muted">
+        <div className="text-center flex flex-col items-center">
+          <Image
+            src="/images/LOGO.png"
+            alt="SmartClose TC"
+            width={220}
+            height={80}
+            className="h-auto w-auto max-h-16 object-contain"
+            priority
+          />
+          <p className="mt-4 text-sm text-text-muted">
             Sign in to access your portal
           </p>
         </div>
