@@ -38,9 +38,9 @@ export default async function ForgotPasswordPage({
           <Image
             src="/images/logo1.png"
             alt="SmartClose TC"
-            width={180}
-            height={60}
-            className="h-auto w-auto max-h-12 object-contain mb-4"
+            width={320}
+            height={120}
+            className="h-auto w-auto max-h-24 object-contain mb-4"
             priority
           />
           <h2 className="mt-2 text-2xl font-bold text-brand-black tracking-tight">

@@ -30,13 +30,13 @@ export function Sidebar() {
   return (
     <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-brand-black">
       <div className="flex flex-col flex-1 min-h-0 pt-5 pb-4">
-        <div className="flex items-center flex-shrink-0 px-6 py-2">
+        <div className="flex items-center flex-shrink-0 px-4 py-4">
           <Image
             src="/images/logo2.png"
             alt="SmartClose TC Logo"
-            width={180}
-            height={60}
-            className="h-auto w-auto max-h-12 object-contain"
+            width={240}
+            height={100}
+            className="h-auto w-auto max-h-20 object-contain mx-auto"
             priority
           />
         </div>

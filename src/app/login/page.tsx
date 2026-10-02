@@ -41,9 +41,9 @@ export default async function LoginPage({
           <Image
             src="/images/logo1.png"
             alt="SmartClose TC"
-            width={220}
-            height={80}
-            className="h-auto w-auto max-h-16 object-contain"
+            width={320}
+            height={120}
+            className="h-auto w-auto max-h-24 object-contain mb-2"
             priority
           />
           <p className="mt-4 text-sm text-text-muted">
