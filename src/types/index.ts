@@ -21,6 +21,7 @@ export const TransactionSchema = z.object({
   status: TransactionStatusSchema.default('ACTIVE'),
   price: z.coerce.number().min(0, 'Price must be positive'),
   emd_amount: z.coerce.number().min(0, 'EMD must be positive').optional(),
+  commission_tc: z.coerce.number().min(0).optional(),
   financing_type: FinancingTypeSchema.default('CONVENTIONAL'),
   
   // People (Names)

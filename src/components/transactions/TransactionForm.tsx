@@ -205,6 +205,10 @@ export function TransactionForm({ initialData }: TransactionFormProps) {
             {errors.emd_amount && <span className="text-danger text-xs">{errors.emd_amount.message}</span>}
           </div>
           <div>
+            <label className="block text-sm font-medium text-brand-black mb-1">TC Commission ($)</label>
+            <input {...register('commission_tc')} type="number" step="0.01" placeholder="e.g. 395" className="w-full rounded-md border border-gray-300 p-2 focus:ring-brand-gold focus:border-brand-gold min-h-[44px]" />
+          </div>
+          <div>
             <label className="block text-sm font-medium text-brand-black mb-1">Financing Type</label>
             <select {...register('financing_type')} className="w-full rounded-md border border-gray-300 p-2 focus:ring-brand-gold focus:border-brand-gold min-h-[44px]">
               <option value="CONVENTIONAL">Conventional</option>
@@ -234,10 +238,14 @@ export function TransactionForm({ initialData }: TransactionFormProps) {
             <label className="block text-sm font-medium text-brand-black mb-1">Closing Date</label>
             <input {...register('closing_date')} type="date" className="w-full rounded-md border border-gray-300 p-2 focus:ring-brand-gold focus:border-brand-gold min-h-[44px]" />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-brand-black mb-1">Inspection Deadline</label>
+            <input {...register('inspection_deadline')} type="date" className="w-full rounded-md border border-gray-300 p-2 focus:ring-brand-gold focus:border-brand-gold min-h-[44px]" />
+          </div>
         </div>
       </Accordion>
 
-      <Accordion title="Key Contacts (Agents, Inspector)" defaultOpen={false}>
+      <Accordion title="Key Contacts (Agents, Inspector, Title)" defaultOpen={false}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Controller
             control={control}
@@ -263,7 +271,6 @@ export function TransactionForm({ initialData }: TransactionFormProps) {
               />
             )}
           />
-
           <Controller
             control={control}
             name="inspector_id"
@@ -271,6 +278,30 @@ export function TransactionForm({ initialData }: TransactionFormProps) {
               <ContactSelector
                 label="Inspector"
                 roleType="INSPECTOR"
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="title_company_id"
+            render={({ field }) => (
+              <ContactSelector
+                label="Title Company"
+                roleType="TITLE"
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="escrow_agent_id"
+            render={({ field }) => (
+              <ContactSelector
+                label="Escrow Agent"
+                roleType="ESCROW"
                 value={field.value}
                 onChange={field.onChange}
               />

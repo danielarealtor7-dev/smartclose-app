@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { Calendar, CheckCircle2, ChevronLeft, MapPin, User } from 'lucide-react'
+import { TransactionTabs } from '@/components/transactions/TransactionTabs'
 
 export default async function TransactionDetailLayout({
   children,
@@ -86,22 +87,7 @@ export default async function TransactionDetailLayout({
         </div>
 
         {/* Navigation Tabs */}
-        <nav className="flex space-x-8 overflow-x-auto" aria-label="Tabs">
-          {tabs.map((tab) => (
-            <Link
-              key={tab.name}
-              href={tab.href}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
-                // Since this is a server component layout, we can't easily check pathname,
-                // so we rely on the children rendering a matching active state, or we make this a client component.
-                // For simplicity, we'll let active state styling be basic here.
-                'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              {tab.name}
-            </Link>
-          ))}
-        </nav>
+        <TransactionTabs tabs={tabs} />
       </div>
 
       {/* Tab Content Area */}
