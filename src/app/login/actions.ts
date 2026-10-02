@@ -45,7 +45,7 @@ export async function forgotPassword(formData: FormData) {
     : 'https://app.smartclosetc.com'
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/reset-password`,
+    redirectTo: `${origin}/auth/callback?redirect_to=/reset-password`,
   })
 
   if (error) {
