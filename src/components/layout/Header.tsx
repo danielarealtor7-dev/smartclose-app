@@ -4,7 +4,7 @@ import { Search, UserCircle, LogOut } from 'lucide-react'
 import { MobileNav } from './MobileNav'
 import { useState } from 'react'
 
-export function Header() {
+export function Header({ userEmail, userName }: { userEmail?: string, userName?: string }) {
   const [profileOpen, setProfileOpen] = useState(false)
 
   return (
@@ -59,8 +59,8 @@ export function Header() {
                 tabIndex={-1}
               >
                 <div className="px-4 py-2 border-b border-gray-100">
-                  <p className="text-sm font-medium text-brand-black">Daniela</p>
-                  <p className="text-xs text-text-muted truncate">SmartClose TC</p>
+                  <p className="text-sm font-medium text-brand-black">{userName || 'User'}</p>
+                  <p className="text-xs text-text-muted truncate">{userEmail || 'SmartClose TC'}</p>
                 </div>
                 <form action="/auth/signout" method="POST">
                   <button

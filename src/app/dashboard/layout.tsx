@@ -1,18 +1,38 @@
 import { Sidebar } from '@/components/layout/Sidebar'
 import { Header } from '@/components/layout/Header'
 
-export default function DashboardLayout({
+import { createClient } from '@/utils/supabase/server'
+
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const supabase = await createClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  let userName = ''
+  
+  if (user) {
+    const { data: profile } = await supabase
+      .from('users')
+      .select('full_name')
+      .eq('id', user.id)
+      .single()
+      
+    if (profile) {
+      userName = profile.full_name
+    }
+  }
+
   return (
     <div className="min-h-screen bg-bg-soft">
       <Sidebar />
-      <div className="flex flex-col md:pl-64">
-        <Header />
-        <main className="flex-1">
-          <div className="py-6 px-4 sm:px-6 md:px-8">
+      <div className="flex flex-col flex-1 min-w-0 md:pl-64">
+        <Header userEmail={user?.email} userName={userName} />
+        <main className="flex-1 overflow-auto">
+          <div className="py-6 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto w-full">
             {children}
           </div>
         </main>
