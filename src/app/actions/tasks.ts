@@ -2,7 +2,8 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
-import type { Task, TaskTemplateSchema, TaskTemplateItemSchema } from '@/types'
+import { revalidatePath } from 'next/cache'
+import type { Task } from '@/types'
 // import { z } from 'zod'
 
 export async function generateTransactionTasks(
@@ -119,3 +120,123 @@ export async function applyTransactionTasksDiff(transactionId: string, addedTask
   
   return { success: true }
 }
+
+export async function createTask(data: {
+  transaction_id: string
+  title: string
+  description?: string | null
+  due_date?: string | null
+  status?: string
+  priority?: string
+  category?: string | null
+  waiting_on?: string | null
+  notes?: string | null
+}) {
+  const supabase = await createClient()
+
+  const { data: userResp } = await supabase.auth.getUser()
+  if (!userResp?.user) return { error: 'Unauthorized' }
+
+  const { data: created, error } = await supabase
+    .from('tasks')
+    .insert({
+      ...data,
+      status: data.status || 'PENDING',
+      priority: data.priority || 'MEDIUM',
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error creating task:', error)
+    return { error: error.message }
+  }
+
+  revalidatePath(`/dashboard/transactions/${data.transaction_id}/tasks`)
+  return { success: true, data: created }
+}
+
+export async function updateTask(id: string, transactionId: string, data: {
+  title?: string
+  description?: string | null
+  due_date?: string | null
+  status?: string
+  priority?: string
+  category?: string | null
+  waiting_on?: string | null
+  notes?: string | null
+}) {
+  const supabase = await createClient()
+
+  const { data: userResp } = await supabase.auth.getUser()
+  if (!userResp?.user) return { error: 'Unauthorized' }
+
+  const updatePayload: Record<string, unknown> = { ...data }
+  if (data.status === 'COMPLETED') {
+    updatePayload.completed_at = new Date().toISOString()
+  } else if (data.status && data.status !== 'COMPLETED') {
+    updatePayload.completed_at = null
+  }
+
+  const { data: updated, error } = await supabase
+    .from('tasks')
+    .update(updatePayload)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error updating task:', error)
+    return { error: error.message }
+  }
+
+  revalidatePath(`/dashboard/transactions/${transactionId}/tasks`)
+  return { success: true, data: updated }
+}
+
+export async function deleteTask(id: string, transactionId: string) {
+  const supabase = await createClient()
+
+  const { data: userResp } = await supabase.auth.getUser()
+  if (!userResp?.user) return { error: 'Unauthorized' }
+
+  const { error } = await supabase
+    .from('tasks')
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error deleting task:', error)
+    return { error: error.message }
+  }
+
+  revalidatePath(`/dashboard/transactions/${transactionId}/tasks`)
+  return { success: true }
+}
+
+export async function updateTaskStatus(id: string, transactionId: string, status: string) {
+  const supabase = await createClient()
+
+  const { data: userResp } = await supabase.auth.getUser()
+  if (!userResp?.user) return { error: 'Unauthorized' }
+
+  const updatePayload: Record<string, unknown> = { status }
+  if (status === 'COMPLETED') {
+    updatePayload.completed_at = new Date().toISOString()
+  } else {
+    updatePayload.completed_at = null
+  }
+
+  const { error } = await supabase
+    .from('tasks')
+    .update(updatePayload)
+    .eq('id', id)
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  revalidatePath(`/dashboard/transactions/${transactionId}/tasks`)
+  return { success: true }
+}
+

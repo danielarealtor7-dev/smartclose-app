@@ -107,3 +107,32 @@ export async function restoreTransaction(id: string) {
   revalidatePath('/dashboard/transactions')
   return { success: true }
 }
+
+export async function deleteTransaction(id: string) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+  const { data: userData } = await supabase.from('users').select('org_id').eq('auth_id', user.id).single()
+  if (!userData?.org_id) return { error: 'No organization found' }
+
+  // Delete child records first to ensure clean cascade
+  await supabase.from('tasks').delete().eq('transaction_id', id)
+  await supabase.from('transaction_dates').delete().eq('transaction_id', id)
+  await supabase.from('communication_logs').delete().eq('transaction_id', id)
+
+  const { error } = await supabase
+    .from('transactions')
+    .delete()
+    .eq('id', id)
+    .eq('org_id', userData.org_id)
+
+  if (error) {
+    console.error('Error deleting transaction:', error)
+    return { error: 'Failed to delete transaction.' }
+  }
+
+  revalidatePath('/dashboard/transactions')
+  return { success: true }
+}
+

@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { FileText, Plus, X } from 'lucide-react'
-import { createTaskTemplate } from '@/app/actions/settings'
+import { FileText, Plus, X, Pencil, Trash2 } from 'lucide-react'
+import { createTaskTemplate, updateTaskTemplate, deleteTaskTemplate } from '@/app/actions/settings'
+import { useRouter } from 'next/navigation'
 
 interface TemplateItem {
   id: string
@@ -14,8 +15,11 @@ interface TemplateItem {
 }
 
 export function SettingsClient({ initialTemplates }: { initialTemplates: TemplateItem[] }) {
+  const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingTemplate, setEditingTemplate] = useState<TemplateItem | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -24,14 +28,30 @@ export function SettingsClient({ initialTemplates }: { initialTemplates: Templat
     setError(null)
 
     const formData = new FormData(e.currentTarget)
-    const result = await createTaskTemplate(formData)
+    const result = editingTemplate
+      ? await updateTaskTemplate(editingTemplate.id, formData)
+      : await createTaskTemplate(formData)
 
     if (result.error) {
       setError(result.error)
       setIsSubmitting(false)
     } else {
       setIsModalOpen(false)
+      setEditingTemplate(null)
       setIsSubmitting(false)
+      router.refresh()
+    }
+  }
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!window.confirm(`Are you sure you want to delete template "${name}"?`)) return
+    setDeletingId(id)
+    const result = await deleteTaskTemplate(id)
+    setDeletingId(null)
+    if (result?.error) {
+      alert(result.error)
+    } else {
+      router.refresh()
     }
   }
 
@@ -49,8 +69,11 @@ export function SettingsClient({ initialTemplates }: { initialTemplates: Templat
             Task Templates
           </h2>
           <button 
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center px-4 py-2 text-sm font-medium bg-brand-gold text-brand-black rounded-lg hover:bg-gold-hover transition-colors"
+            onClick={() => {
+              setEditingTemplate(null)
+              setIsModalOpen(true)
+            }}
+            className="inline-flex items-center px-4 py-2 text-sm font-semibold bg-brand-gold text-brand-black rounded-lg hover:bg-gold-hover transition-colors shadow-sm"
           >
             <Plus className="w-4 h-4 mr-2" />
             New Template
@@ -88,9 +111,26 @@ export function SettingsClient({ initialTemplates }: { initialTemplates: Templat
                         )}
                       </div>
                     </div>
-                    <button className="text-sm text-brand-gold hover:underline font-medium">
-                      Edit Items
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => {
+                          setEditingTemplate(t)
+                          setIsModalOpen(true)
+                        }}
+                        className="p-1.5 text-gray-500 hover:text-brand-black hover:bg-gray-100 rounded-md transition-colors"
+                        title="Edit Template"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(t.id, t.name)}
+                        disabled={deletingId === t.id}
+                        className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50"
+                        title="Delete Template"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </li>
               ))}
@@ -103,9 +143,12 @@ export function SettingsClient({ initialTemplates }: { initialTemplates: Templat
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h2 className="text-lg font-semibold text-brand-black">Create Task Template</h2>
+              <h2 className="text-lg font-semibold text-brand-black">{editingTemplate ? 'Edit Task Template' : 'Create Task Template'}</h2>
               <button 
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => {
+                  setIsModalOpen(false)
+                  setEditingTemplate(null)
+                }}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X className="w-5 h-5" />
@@ -128,6 +171,7 @@ export function SettingsClient({ initialTemplates }: { initialTemplates: Templat
                   name="name"
                   id="name"
                   required
+                  defaultValue={editingTemplate?.name || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-gold focus:border-brand-gold outline-none transition-all"
                   placeholder="e.g. Standard Buyer Tasks"
                 />
@@ -141,6 +185,7 @@ export function SettingsClient({ initialTemplates }: { initialTemplates: Templat
                   name="description"
                   id="description"
                   rows={2}
+                  defaultValue={editingTemplate?.description || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-gold focus:border-brand-gold outline-none transition-all"
                   placeholder="Optional description"
                 />
@@ -154,6 +199,7 @@ export function SettingsClient({ initialTemplates }: { initialTemplates: Templat
                   <select
                     name="transaction_side"
                     id="transaction_side"
+                    defaultValue={editingTemplate?.transaction_side || ''}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-gold focus:border-brand-gold outline-none bg-white"
                   >
                     <option value="">Any</option>
@@ -170,6 +216,7 @@ export function SettingsClient({ initialTemplates }: { initialTemplates: Templat
                   <select
                     name="condition_financing_type"
                     id="condition_financing_type"
+                    defaultValue={editingTemplate?.condition_financing_type || ''}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-gold focus:border-brand-gold outline-none bg-white"
                   >
                     <option value="">Any</option>
@@ -189,6 +236,7 @@ export function SettingsClient({ initialTemplates }: { initialTemplates: Templat
                 <select
                   name="condition_property_type"
                   id="condition_property_type"
+                  defaultValue={editingTemplate?.condition_property_type || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-gold focus:border-brand-gold outline-none bg-white"
                 >
                   <option value="">Any</option>
@@ -204,7 +252,10 @@ export function SettingsClient({ initialTemplates }: { initialTemplates: Templat
               <div className="pt-4 flex justify-end gap-3">
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={() => {
+                    setIsModalOpen(false)
+                    setEditingTemplate(null)
+                  }}
                   className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-200 rounded-lg transition-colors"
                 >
                   Cancel
@@ -212,9 +263,9 @@ export function SettingsClient({ initialTemplates }: { initialTemplates: Templat
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 text-sm font-medium bg-brand-gold text-brand-black rounded-lg hover:bg-gold-hover transition-colors disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-semibold bg-brand-gold text-brand-black rounded-lg hover:bg-gold-hover transition-colors disabled:opacity-50"
                 >
-                  {isSubmitting ? 'Creating...' : 'Create Template'}
+                  {isSubmitting ? 'Saving...' : (editingTemplate ? 'Update Template' : 'Create Template')}
                 </button>
               </div>
             </form>

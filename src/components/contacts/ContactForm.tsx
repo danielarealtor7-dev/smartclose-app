@@ -1,16 +1,29 @@
 'use client'
 
 import { useState } from 'react'
-import { createContact } from '@/app/actions/contacts'
+import { createContact, updateContact } from '@/app/actions/contacts'
 import { X } from 'lucide-react'
+
+export interface ContactData {
+  id?: string
+  first_name: string
+  last_name?: string | null
+  role_type?: string | null
+  email?: string | null
+  phone?: string | null
+}
 
 interface ContactFormProps {
   onClose: () => void
+  initialData?: ContactData | null
+  onSaved?: () => void
 }
 
-export function ContactForm({ onClose }: ContactFormProps) {
+export function ContactForm({ onClose, initialData, onSaved }: ContactFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const isEditing = Boolean(initialData?.id)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -22,16 +35,19 @@ export function ContactForm({ onClose }: ContactFormProps) {
       first_name: formData.get('first_name') as string,
       last_name: formData.get('last_name') as string,
       role_type: formData.get('role_type') as string,
-      email: formData.get('email') as string,
-      phone: formData.get('phone') as string,
+      email: (formData.get('email') as string) || undefined,
+      phone: (formData.get('phone') as string) || undefined,
     }
 
-    const { error: submitError } = await createContact(data)
+    const res = isEditing && initialData?.id
+      ? await updateContact(initialData.id, data)
+      : await createContact(data)
 
-    if (submitError) {
-      setError(submitError)
+    if (res.error) {
+      setError(res.error)
       setIsSubmitting(false)
     } else {
+      if (onSaved) onSaved()
       onClose()
     }
   }
@@ -40,7 +56,7 @@ export function ContactForm({ onClose }: ContactFormProps) {
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-full">
         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-          <h2 className="text-lg font-semibold text-brand-black">Add Contact</h2>
+          <h2 className="text-lg font-semibold text-brand-black">{isEditing ? 'Edit Contact' : 'Add Contact'}</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <X className="w-5 h-5" />
           </button>
@@ -57,20 +73,39 @@ export function ContactForm({ onClose }: ContactFormProps) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                <input required type="text" name="first_name" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold" />
+                <input 
+                  required 
+                  type="text" 
+                  name="first_name" 
+                  defaultValue={initialData?.first_name || ''} 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold" 
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                <input required type="text" name="last_name" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold" />
+                <input 
+                  required 
+                  type="text" 
+                  name="last_name" 
+                  defaultValue={initialData?.last_name || ''} 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold" 
+                />
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Role Type</label>
-              <select required name="role_type" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold bg-white">
+              <select 
+                required 
+                name="role_type" 
+                defaultValue={initialData?.role_type || 'Realtor'} 
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold bg-white"
+              >
                 <option value="Realtor">Realtor</option>
                 <option value="Title Company">Title Company</option>
+                <option value="Escrow Agent">Escrow Agent</option>
                 <option value="Lender">Lender</option>
+                <option value="Inspector">Inspector</option>
                 <option value="Client">Client</option>
                 <option value="Other">Other</option>
               </select>
@@ -78,12 +113,22 @@ export function ContactForm({ onClose }: ContactFormProps) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input type="email" name="email" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold" />
+              <input 
+                type="email" 
+                name="email" 
+                defaultValue={initialData?.email || ''} 
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold" 
+              />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-              <input type="tel" name="phone" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold" />
+              <input 
+                type="tel" 
+                name="phone" 
+                defaultValue={initialData?.phone || ''} 
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold" 
+              />
             </div>
           </div>
           
@@ -92,7 +137,7 @@ export function ContactForm({ onClose }: ContactFormProps) {
               Cancel
             </button>
             <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-brand-gold text-brand-black hover:bg-brand-gold-hover rounded-lg font-medium transition-colors disabled:opacity-50">
-              {isSubmitting ? 'Saving...' : 'Save Contact'}
+              {isSubmitting ? 'Saving...' : (isEditing ? 'Update Contact' : 'Save Contact')}
             </button>
           </div>
         </form>
@@ -100,3 +145,4 @@ export function ContactForm({ onClose }: ContactFormProps) {
     </div>
   )
 }
+

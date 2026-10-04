@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Search, Filter, FolderClosed, Plus } from 'lucide-react'
+import { TransactionRowActions } from '@/components/transactions/TransactionRowActions'
 
 export default async function TransactionsPage({
   searchParams,
@@ -142,9 +143,7 @@ export default async function TransactionsPage({
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <Link href={`/dashboard/transactions/${tx.id}`} className="text-brand-gold hover:text-gold-hover font-medium">
-                        View
-                      </Link>
+                      <TransactionRowActions id={String(tx.id)} address={tx.property_address || 'Property'} isArchived={Boolean(tx.is_archived)} />
                     </td>
                   </tr>
                 ))}

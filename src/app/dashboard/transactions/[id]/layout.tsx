@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { Calendar, CheckCircle2, ChevronLeft, MapPin, User } from 'lucide-react'
 import { TransactionTabs } from '@/components/transactions/TransactionTabs'
+import { TransactionDetailActions } from '@/components/transactions/TransactionDetailActions'
 
 export default async function TransactionDetailLayout({
   children,
@@ -77,12 +78,7 @@ export default async function TransactionDetailLayout({
             }`}>
               {tx.status}
             </span>
-            <Link 
-              href={`/dashboard/transactions/${tx.id}/edit`}
-              className="px-3 py-1.5 text-sm font-medium text-brand-black bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none min-h-[44px] flex items-center"
-            >
-              Edit
-            </Link>
+            <TransactionDetailActions id={String(tx.id)} address={tx.property_address || 'Property'} isArchived={Boolean(tx.is_archived)} />
           </div>
         </div>
 

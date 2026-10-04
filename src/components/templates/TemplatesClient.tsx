@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Files, Plus, X } from 'lucide-react'
-import { createEmailTemplate } from '@/app/actions/templates'
+import { Files, Plus, X, Pencil, Trash2 } from 'lucide-react'
+import { createEmailTemplate, updateEmailTemplate, deleteEmailTemplate } from '@/app/actions/templates'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { useRouter } from 'next/navigation'
 
 interface EmailTemplateItem {
   id: string
@@ -13,8 +14,11 @@ interface EmailTemplateItem {
 }
 
 export function TemplatesClient({ initialTemplates }: { initialTemplates: EmailTemplateItem[] }) {
+  const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingTemplate, setEditingTemplate] = useState<EmailTemplateItem | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -23,14 +27,30 @@ export function TemplatesClient({ initialTemplates }: { initialTemplates: EmailT
     setError(null)
 
     const formData = new FormData(e.currentTarget)
-    const result = await createEmailTemplate(formData)
+    const result = editingTemplate
+      ? await updateEmailTemplate(editingTemplate.id, formData)
+      : await createEmailTemplate(formData)
 
     if (result.error) {
       setError(result.error)
       setIsSubmitting(false)
     } else {
       setIsModalOpen(false)
+      setEditingTemplate(null)
       setIsSubmitting(false)
+      router.refresh()
+    }
+  }
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!window.confirm(`Are you sure you want to delete template "${name}"?`)) return
+    setDeletingId(id)
+    const result = await deleteEmailTemplate(id)
+    setDeletingId(null)
+    if (result?.error) {
+      alert(result.error)
+    } else {
+      router.refresh()
     }
   }
 
@@ -41,15 +61,16 @@ export function TemplatesClient({ initialTemplates }: { initialTemplates: EmailT
           <h1 className="text-2xl font-bold text-brand-black tracking-tight">Email Templates</h1>
           <p className="mt-1 text-sm text-text-muted">Manage standard email templates for your communications.</p>
         </div>
-        {initialTemplates.length > 0 && (
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center px-4 py-2 text-sm font-medium bg-brand-gold text-brand-black rounded-lg hover:bg-gold-hover transition-colors"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            New Template
-          </button>
-        )}
+        <button 
+          onClick={() => {
+            setEditingTemplate(null)
+            setIsModalOpen(true)
+          }}
+          className="inline-flex items-center px-4 py-2 text-sm font-semibold bg-brand-gold text-brand-black rounded-lg hover:bg-gold-hover transition-colors shadow-sm"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          New Template
+        </button>
       </div>
 
       {initialTemplates.length === 0 ? (
@@ -58,16 +79,43 @@ export function TemplatesClient({ initialTemplates }: { initialTemplates: EmailT
           description="Create email templates to speed up communication with clients and agents."
           icon={Files}
           actionLabel="Create Template"
-          onAction={() => setIsModalOpen(true)}
+          onAction={() => {
+            setEditingTemplate(null)
+            setIsModalOpen(true)
+          }}
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {initialTemplates.map((t) => (
-            <div key={t.id} className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-all">
-              <h3 className="font-semibold text-brand-black mb-2">{t.name}</h3>
-              <p className="text-sm text-gray-600 mb-4 font-medium">Subject: {t.subject}</p>
-              <div className="text-sm text-gray-500 line-clamp-3 bg-gray-50 p-3 rounded border border-gray-100">
-                {t.body}
+            <div key={t.id} className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <h3 className="font-semibold text-brand-black">{t.name}</h3>
+                  <div className="flex items-center gap-1">
+                    <button 
+                      onClick={() => {
+                        setEditingTemplate(t)
+                        setIsModalOpen(true)
+                      }}
+                      className="p-1 text-gray-400 hover:text-brand-black hover:bg-gray-100 rounded transition-colors"
+                      title="Edit Template"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(t.id, t.name)}
+                      disabled={deletingId === t.id}
+                      className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                      title="Delete Template"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600 mb-3 font-medium">Subject: {t.subject}</p>
+                <div className="text-sm text-gray-500 line-clamp-3 bg-gray-50 p-3 rounded border border-gray-100">
+                  {t.body}
+                </div>
               </div>
             </div>
           ))}
@@ -78,9 +126,12 @@ export function TemplatesClient({ initialTemplates }: { initialTemplates: EmailT
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
             <div className="flex items-center justify-between p-6 border-b border-gray-100 shrink-0">
-              <h2 className="text-lg font-semibold text-brand-black">Create Email Template</h2>
+              <h2 className="text-lg font-semibold text-brand-black">{editingTemplate ? 'Edit Email Template' : 'Create Email Template'}</h2>
               <button 
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => {
+                  setIsModalOpen(false)
+                  setEditingTemplate(null)
+                }}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X className="w-5 h-5" />
@@ -103,6 +154,7 @@ export function TemplatesClient({ initialTemplates }: { initialTemplates: EmailT
                   name="name"
                   id="name"
                   required
+                  defaultValue={editingTemplate?.name || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-gold focus:border-brand-gold outline-none transition-all"
                   placeholder="e.g. Introduction to Seller"
                 />
@@ -117,8 +169,9 @@ export function TemplatesClient({ initialTemplates }: { initialTemplates: EmailT
                   name="subject"
                   id="subject"
                   required
+                  defaultValue={editingTemplate?.subject || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-gold focus:border-brand-gold outline-none transition-all"
-                  placeholder="Subject line"
+                  placeholder="e.g. Introduction - {{property_address}}"
                 />
               </div>
 
@@ -129,28 +182,34 @@ export function TemplatesClient({ initialTemplates }: { initialTemplates: EmailT
                 <textarea
                   name="body"
                   id="body"
-                  rows={8}
+                  rows={6}
                   required
+                  defaultValue={editingTemplate?.body || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-gold focus:border-brand-gold outline-none transition-all"
-                  placeholder="Dear [Client Name]..."
+                  placeholder="Hello {{buyer_name}}, welcome to the transaction..."
                 />
-                <p className="text-xs text-gray-500 mt-1">You can use placeholders like [Client Name] or [Property Address]</p>
+                <p className="mt-1 text-xs text-text-muted">
+                  You can use variables like: <code>&#123;&#123;property_address&#125;&#125;</code>, <code>&#123;&#123;closing_date&#125;&#125;</code>
+                </p>
               </div>
 
-              <div className="pt-4 flex justify-end gap-3 shrink-0">
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-200 rounded-lg transition-colors"
+                  onClick={() => {
+                    setIsModalOpen(false)
+                    setEditingTemplate(null)
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 text-sm font-medium bg-brand-gold text-brand-black rounded-lg hover:bg-gold-hover transition-colors disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-semibold bg-brand-gold text-brand-black hover:bg-gold-hover rounded-lg transition-colors disabled:opacity-50"
                 >
-                  {isSubmitting ? 'Saving...' : 'Save Template'}
+                  {isSubmitting ? 'Saving...' : (editingTemplate ? 'Update Template' : 'Create Template')}
                 </button>
               </div>
             </form>

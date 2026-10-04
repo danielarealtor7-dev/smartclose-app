@@ -41,3 +41,74 @@ export async function createEmailTemplate(formData: FormData) {
   revalidatePath('/dashboard/templates')
   return { success: true, data }
 }
+
+export async function updateEmailTemplate(id: string, formData: FormData) {
+  const supabase = await createClient()
+
+  const { data: userData } = await supabase.auth.getUser()
+  if (!userData?.user) return { error: 'Not authenticated' }
+
+  const { data: profile } = await supabase
+    .from('users')
+    .select('org_id')
+    .eq('auth_id', userData.user.id)
+    .single()
+
+  if (!profile?.org_id) return { error: 'No organization found' }
+
+  const name = formData.get('name') as string
+  const subject = formData.get('subject') as string
+  const body = formData.get('body') as string
+
+  if (!name || !subject || !body) return { error: 'All fields are required' }
+
+  const { data, error } = await supabase
+    .from('email_templates')
+    .update({
+      name,
+      subject,
+      body
+    })
+    .eq('id', id)
+    .eq('org_id', profile.org_id)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error updating email template:', error)
+    return { error: 'Failed to update template' }
+  }
+
+  revalidatePath('/dashboard/templates')
+  return { success: true, data }
+}
+
+export async function deleteEmailTemplate(id: string) {
+  const supabase = await createClient()
+
+  const { data: userData } = await supabase.auth.getUser()
+  if (!userData?.user) return { error: 'Not authenticated' }
+
+  const { data: profile } = await supabase
+    .from('users')
+    .select('org_id')
+    .eq('auth_id', userData.user.id)
+    .single()
+
+  if (!profile?.org_id) return { error: 'No organization found' }
+
+  const { error } = await supabase
+    .from('email_templates')
+    .delete()
+    .eq('id', id)
+    .eq('org_id', profile.org_id)
+
+  if (error) {
+    console.error('Error deleting email template:', error)
+    return { error: 'Failed to delete template' }
+  }
+
+  revalidatePath('/dashboard/templates')
+  return { success: true }
+}
+
