@@ -5,6 +5,27 @@ export const FinancingTypeSchema = z.enum(['FHA', 'VA', 'CONVENTIONAL', 'CASH', 
 export const PropertyTypeSchema = z.enum(['SINGLE_FAMILY', 'CONDO', 'MANUFACTURED', 'NEW_CONSTRUCTION', 'OTHER'])
 export const TransactionStatusSchema = z.enum(['ACTIVE', 'PENDING', 'CLOSED', 'CANCELLED'])
 
+const optionalUuid = z
+  .string()
+  .uuid()
+  .nullable()
+  .optional()
+  .or(z.literal('').transform(() => null))
+
+const optionalDate = z
+  .string()
+  .nullable()
+  .optional()
+  .or(z.literal('').transform(() => null))
+
+const optionalNumber = z
+  .coerce
+  .number()
+  .nullable()
+  .optional()
+  .or(z.literal('').transform(() => null))
+
+
 export const TransactionSchema = z.object({
   id: z.string().uuid().optional(),
   org_id: z.string().uuid().optional(),
@@ -20,36 +41,37 @@ export const TransactionSchema = z.object({
   transaction_side: TransactionSideSchema,
   status: TransactionStatusSchema.default('ACTIVE'),
   price: z.coerce.number().min(0, 'Price must be positive'),
-  emd_amount: z.coerce.number().min(0, 'EMD must be positive').optional(),
-  commission_tc: z.coerce.number().min(0).optional(),
+  emd_amount: optionalNumber,
+  commission_tc: optionalNumber,
   financing_type: FinancingTypeSchema.default('CONVENTIONAL'),
   
   // People (Names)
-  buyer_names: z.string().optional(),
-  seller_names: z.string().optional(),
+  buyer_names: z.string().optional().nullable(),
+  seller_names: z.string().optional().nullable(),
   
   // Contacts (IDs)
-  buyer_agent_id: z.string().uuid().nullable().optional(),
-  listing_agent_id: z.string().uuid().nullable().optional(),
-  escrow_agent_id: z.string().uuid().nullable().optional(),
-  lender_id: z.string().uuid().nullable().optional(),
-  title_company_id: z.string().uuid().nullable().optional(),
-  assigned_tc_id: z.string().uuid().nullable().optional(),
-  inspector_id: z.string().uuid().nullable().optional(),
+  buyer_agent_id: optionalUuid,
+  listing_agent_id: optionalUuid,
+  escrow_agent_id: optionalUuid,
+  lender_id: optionalUuid,
+  title_company_id: optionalUuid,
+  assigned_tc_id: optionalUuid,
+  inspector_id: optionalUuid,
   
   // Dates
-  effective_date: z.string().optional().nullable(),
-  inspection_deadline: z.string().optional().nullable(),
-  closing_date: z.string().optional().nullable(),
+  effective_date: optionalDate,
+  inspection_deadline: optionalDate,
+  closing_date: optionalDate,
   
   // Misc
-  notes: z.string().optional(),
+  notes: z.string().optional().nullable(),
   is_archived: z.boolean().default(false),
-  import_batch_id: z.string().uuid().nullable().optional(),
+  import_batch_id: optionalUuid,
   import_row_number: z.number().int().nullable().optional(),
 })
 
 export type Transaction = z.infer<typeof TransactionSchema>
+
 
 export const DateStatusSchema = z.enum(['PENDING', 'COMPLETED', 'WAIVED', 'EXTENDED'])
 

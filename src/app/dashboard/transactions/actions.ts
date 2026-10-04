@@ -4,6 +4,18 @@ import { createClient } from '@/utils/supabase/server'
 import { TransactionSchema } from '@/types'
 import { revalidatePath } from 'next/cache'
 
+function sanitizeTransactionFields(data: Record<string, unknown>) {
+  const sanitized: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(data)) {
+    if (value === '' || value === undefined) {
+      sanitized[key] = null
+    } else {
+      sanitized[key] = value
+    }
+  }
+  return sanitized
+}
+
 export async function createTransaction(formData: Record<string, unknown>) {
   const supabase = await createClient()
 
@@ -19,13 +31,16 @@ export async function createTransaction(formData: Record<string, unknown>) {
   const validatedFields = TransactionSchema.safeParse(formData)
 
   if (!validatedFields.success) {
-    return { error: 'Validation failed', details: validatedFields.error.flatten() }
+    const errorMsg = Object.values(validatedFields.error.flatten().fieldErrors).flat().join(', ')
+    return { error: errorMsg || 'Validation failed', details: validatedFields.error.flatten() }
   }
+
+  const payload = sanitizeTransactionFields(validatedFields.data)
 
   const { data, error } = await supabase
     .from('transactions')
     .insert({
-      ...validatedFields.data,
+      ...payload,
       org_id: userData.org_id,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -35,7 +50,7 @@ export async function createTransaction(formData: Record<string, unknown>) {
 
   if (error) {
     console.error('Error creating transaction:', error)
-    return { error: 'Failed to create transaction. Please try again.' }
+    return { error: error.message || 'Failed to create transaction. Please try again.' }
   }
 
   revalidatePath('/dashboard/transactions')
@@ -48,13 +63,16 @@ export async function updateTransaction(id: string, formData: Record<string, unk
   const validatedFields = TransactionSchema.safeParse(formData)
 
   if (!validatedFields.success) {
-    return { error: 'Validation failed', details: validatedFields.error.flatten() }
+    const errorMsg = Object.values(validatedFields.error.flatten().fieldErrors).flat().join(', ')
+    return { error: errorMsg || 'Validation failed', details: validatedFields.error.flatten() }
   }
+
+  const payload = sanitizeTransactionFields(validatedFields.data)
 
   const { data, error } = await supabase
     .from('transactions')
     .update({
-      ...validatedFields.data,
+      ...payload,
       updated_at: new Date().toISOString(),
     })
     .eq('id', id)
@@ -62,13 +80,15 @@ export async function updateTransaction(id: string, formData: Record<string, unk
     .single()
 
   if (error) {
-    return { error: 'Failed to update transaction.' }
+    console.error('Error updating transaction:', error)
+    return { error: error.message || 'Failed to update transaction.' }
   }
 
   revalidatePath('/dashboard/transactions')
   revalidatePath(`/dashboard/transactions/${id}`)
   return { success: true, data }
 }
+
 
 export async function archiveTransaction(id: string) {
   const supabase = await createClient()
