@@ -24,6 +24,10 @@ export default async function TransactionsPage({
     query = query.eq('status', 'CLOSED').eq('is_archived', false)
   } else if (view === 'cancelled') {
     query = query.eq('status', 'CANCELLED').eq('is_archived', false)
+  } else if (view === 'archived') {
+    query = query.eq('is_archived', true)
+  } else {
+    query = query.eq('is_archived', false)
   }
 
   // Text Search
@@ -44,7 +48,9 @@ export default async function TransactionsPage({
     { id: 'at-risk', label: 'At Risk' },
     { id: 'closed', label: 'Closed' },
     { id: 'cancelled', label: 'Cancelled' },
+    { id: 'archived', label: 'Archived' },
   ]
+
 
   return (
     <div className="space-y-6">

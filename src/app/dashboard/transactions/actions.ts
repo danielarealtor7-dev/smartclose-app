@@ -93,6 +93,11 @@ export async function updateTransaction(id: string, formData: Record<string, unk
 export async function archiveTransaction(id: string) {
   const supabase = await createClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+  const { data: userData } = await supabase.from('users').select('org_id').eq('auth_id', user.id).single()
+  if (!userData?.org_id) return { error: 'No organization found' }
+
   const { error } = await supabase
     .from('transactions')
     .update({
@@ -100,17 +105,26 @@ export async function archiveTransaction(id: string) {
       updated_at: new Date().toISOString(),
     })
     .eq('id', id)
+    .eq('org_id', userData.org_id)
 
   if (error) {
-    return { error: 'Failed to archive transaction.' }
+    console.error('Error archiving transaction:', error)
+    return { error: error.message || 'Failed to archive transaction.' }
   }
 
   revalidatePath('/dashboard/transactions')
+  revalidatePath('/dashboard/archive')
+  revalidatePath(`/dashboard/transactions/${id}`)
   return { success: true }
 }
 
 export async function restoreTransaction(id: string) {
   const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+  const { data: userData } = await supabase.from('users').select('org_id').eq('auth_id', user.id).single()
+  if (!userData?.org_id) return { error: 'No organization found' }
 
   const { error } = await supabase
     .from('transactions')
@@ -119,14 +133,19 @@ export async function restoreTransaction(id: string) {
       updated_at: new Date().toISOString(),
     })
     .eq('id', id)
+    .eq('org_id', userData.org_id)
 
   if (error) {
-    return { error: 'Failed to restore transaction.' }
+    console.error('Error restoring transaction:', error)
+    return { error: error.message || 'Failed to restore transaction.' }
   }
 
   revalidatePath('/dashboard/transactions')
+  revalidatePath('/dashboard/archive')
+  revalidatePath(`/dashboard/transactions/${id}`)
   return { success: true }
 }
+
 
 export async function deleteTransaction(id: string) {
   const supabase = await createClient()

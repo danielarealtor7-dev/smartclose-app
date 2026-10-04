@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Eye, Pencil, Archive, Trash2 } from 'lucide-react'
-import { archiveTransaction, deleteTransaction } from '@/app/dashboard/transactions/actions'
+import { Eye, Pencil, Archive, ArchiveRestore, Trash2 } from 'lucide-react'
+import { archiveTransaction, restoreTransaction, deleteTransaction } from '@/app/dashboard/transactions/actions'
 
 interface TransactionRowActionsProps {
   id: string
@@ -17,7 +17,7 @@ export function TransactionRowActions({ id, address, isArchived }: TransactionRo
   const [loading, setLoading] = useState(false)
 
   const handleArchive = async () => {
-    if (!window.confirm(`Archive transaction for "${address}"?`)) return
+    if (!window.confirm(`¿Deseas archivar la transacción de "${address}"?`)) return
     setLoading(true)
     const res = await archiveTransaction(id)
     setLoading(false)
@@ -28,8 +28,20 @@ export function TransactionRowActions({ id, address, isArchived }: TransactionRo
     }
   }
 
+  const handleRestore = async () => {
+    if (!window.confirm(`¿Deseas restaurar la transacción de "${address}" al listado activo?`)) return
+    setLoading(true)
+    const res = await restoreTransaction(id)
+    setLoading(false)
+    if (res?.error) {
+      alert(res.error)
+    } else {
+      router.refresh()
+    }
+  }
+
   const handleDelete = async () => {
-    if (!window.confirm(`Are you sure you want to permanently delete transaction "${address}"? This action cannot be undone.`)) {
+    if (!window.confirm(`¿Estás seguro de eliminar permanentemente la transacción "${address}"? Esta acción no se puede deshacer.`)) {
       return
     }
     setLoading(true)
@@ -47,35 +59,45 @@ export function TransactionRowActions({ id, address, isArchived }: TransactionRo
       <Link 
         href={`/dashboard/transactions/${id}`} 
         className="p-1.5 text-gray-500 hover:text-brand-gold hover:bg-gray-100 rounded-md transition-colors"
-        title="View Transaction"
+        title="Ver Detalle"
       >
         <Eye className="w-4 h-4" />
       </Link>
       <Link 
         href={`/dashboard/transactions/${id}/edit`} 
         className="p-1.5 text-gray-500 hover:text-brand-black hover:bg-gray-100 rounded-md transition-colors"
-        title="Edit Transaction"
+        title="Editar"
       >
         <Pencil className="w-4 h-4" />
       </Link>
-      {!isArchived && (
+      {!isArchived ? (
         <button 
           onClick={handleArchive}
           disabled={loading}
           className="p-1.5 text-gray-500 hover:text-yellow-600 hover:bg-yellow-50 rounded-md transition-colors disabled:opacity-50"
-          title="Archive Transaction"
+          title="Archivar Transacción"
         >
           <Archive className="w-4 h-4" />
+        </button>
+      ) : (
+        <button 
+          onClick={handleRestore}
+          disabled={loading}
+          className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-md transition-colors disabled:opacity-50"
+          title="Restaurar Transacción"
+        >
+          <ArchiveRestore className="w-4 h-4" />
         </button>
       )}
       <button 
         onClick={handleDelete}
         disabled={loading}
         className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50"
-        title="Delete Transaction"
+        title="Eliminar Permanentemente"
       >
         <Trash2 className="w-4 h-4" />
       </button>
     </div>
   )
 }
+
