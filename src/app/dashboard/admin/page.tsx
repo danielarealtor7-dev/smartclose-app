@@ -9,7 +9,7 @@ export default async function AdminPage() {
     getOrgStats()
   ])
 
-  const { users, error } = usersRes
+  const { users, currentUserId, currentUserRole, error } = usersRes
 
   if (error) {
     return (
@@ -33,8 +33,13 @@ export default async function AdminPage() {
       <OrgStats stats={stats} />
 
       <div className="bg-white shadow rounded-lg border border-gray-200 p-6">
-        <UserManagement initialUsers={users || []} />
+        <UserManagement 
+          initialUsers={users || []} 
+          currentUserId={currentUserId}
+          currentUserRole={currentUserRole}
+        />
       </div>
     </div>
   )
 }
+
