@@ -17,14 +17,15 @@ export default async function DashboardLayout({
   if (user) {
     const { data: profile } = await supabase
       .from('users')
-      .select('full_name')
-      .eq('id', user.id)
+      .select('email')
+      .eq('auth_id', user.id)
       .single()
       
     if (profile) {
-      userName = profile.full_name
+      userName = (user.user_metadata?.full_name as string) || profile.email?.split('@')[0] || ''
     }
   }
+
 
   return (
     <div className="min-h-screen bg-bg-soft">

@@ -15,23 +15,13 @@ export default async function EditTransactionPage({
     .eq('id', resolvedParams.id)
     .single()
 
-  // Mock data if running locally without DB connected
-  const tx = transaction || {
-    id: resolvedParams.id,
-    property_address: '123 Mock Street',
-    city: 'Miami',
-    state: 'FL',
-    zip_code: '33101',
-    transaction_side: 'BUYER',
-    property_type: 'SINGLE_FAMILY',
-    financing_type: 'CONVENTIONAL',
-    status: 'ACTIVE',
-    price: 450000,
-    emd_amount: 5000,
-    buyer_names: 'John Doe',
-    seller_names: 'Jane Smith',
-    notes: 'This is a mock transaction.',
+  if (!transaction) {
+    const { notFound } = await import('next/navigation')
+    notFound()
   }
+
+  const tx = transaction
+
 
   return (
     <div className="space-y-6">

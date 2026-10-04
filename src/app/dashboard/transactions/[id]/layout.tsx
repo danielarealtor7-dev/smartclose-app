@@ -22,19 +22,12 @@ export default async function TransactionDetailLayout({
     .single()
 
   if (!transaction) {
-    // Usually we would show a 404 if not found, but we'll mock it if it's missing just for testing
-    // notFound()
+    const { notFound } = await import('next/navigation')
+    notFound()
   }
 
-  // Fallback data for layout if missing
-  const tx = transaction || {
-    id: resolvedParams.id,
-    property_address: '123 Mock Street',
-    buyer_names: 'John Doe',
-    status: 'ACTIVE',
-    effective_date: '2026-09-01',
-    closing_date: '2026-10-15',
-  }
+  const tx = transaction
+
 
   const tabs = [
     { name: 'Overview', href: `/dashboard/transactions/${tx.id}` },

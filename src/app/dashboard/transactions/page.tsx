@@ -34,13 +34,9 @@ export default async function TransactionsPage({
   // Order
   query = query.order('created_at', { ascending: false })
 
-  const { data: transactions, error } = await query
+  const { data: transactions } = await query
 
-  // We mock data for display purposes if the DB connection fails
-  const displayData = transactions && transactions.length > 0 ? transactions : (error ? [] : [
-    { id: 'mock-1', property_address: '123 Test Ave', buyer_names: 'Alice Smith', status: 'ACTIVE', closing_date: '2026-10-15', price: 350000 },
-    { id: 'mock-2', property_address: '456 Mock Blvd', buyer_names: 'Bob Jones', status: 'PENDING', closing_date: '2026-11-01', price: 420000 }
-  ])
+  const displayData = transactions || []
 
   const views = [
     { id: 'active', label: 'Active' },

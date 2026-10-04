@@ -29,7 +29,7 @@ export async function getTodayDashboardItems() {
   const items: DashboardItem[] = []
 
   // 1. Fetch pending tasks
-  const { data: tasks } = await (await supabase).from('tasks')
+  const { data: tasks } = await supabase.from('tasks')
     .select(`
       id, title, due_date, status, category, waiting_on, 
       assigned_to,
@@ -37,7 +37,7 @@ export async function getTodayDashboardItems() {
     `)
     .eq('transactions.org_id', profile.org_id)
     .eq('transactions.is_archived', false)
-    .eq('status', 'TODO') // 'TODO' is the pending state in tasks table schema
+    .in('status', ['TODO', 'PENDING', 'IN_PROGRESS', 'WAITING'])
 
   if (tasks) {
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -62,7 +62,7 @@ export async function getTodayDashboardItems() {
   }
 
   // 2. Fetch pending transaction_dates (EMD, Inspection, etc.)
-  const { data: dates } = await (await supabase).from('transaction_dates')
+  const { data: dates } = await supabase.from('transaction_dates')
     .select(`
       id, name, type, due_date, status,
       responsible_id,
@@ -94,7 +94,7 @@ export async function getTodayDashboardItems() {
   }
   
   // 3. Fetch closing dates directly from active transactions
-  const { data: closingTxs } = await (await supabase).from('transactions')
+  const { data: closingTxs } = await supabase.from('transactions')
     .select(`id, property_address, closing_date, status, buyer_names, seller_names`)
     .eq('org_id', profile.org_id)
     .eq('is_archived', false)

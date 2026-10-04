@@ -11,7 +11,7 @@ export default async function TasksPage({
 
   const { data: tasks, error } = await supabase
     .from('tasks')
-    .select('*, completed_by_user:users!tasks_completed_by_fkey(name)')
+    .select('*')
     .eq('transaction_id', resolvedParams.id)
     .order('due_date', { ascending: true })
 
@@ -21,3 +21,4 @@ export default async function TasksPage({
 
   return <TasksClient transactionId={resolvedParams.id} initialTasks={tasks || []} />
 }
+

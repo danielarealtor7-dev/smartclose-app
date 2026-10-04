@@ -115,3 +115,40 @@ export async function getAllContacts() {
 
   return { data, error: error?.message }
 }
+
+export async function updateTransactionContactRole(
+  transactionId: string,
+  roleField: 'buyer_agent_id' | 'listing_agent_id' | 'lender_id' | 'inspector_id' | 'title_company_id' | 'escrow_agent_id',
+  contactId: string | null
+) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+  const { data: userData } = await supabase.from('users').select('org_id').eq('auth_id', user.id).single()
+  if (!userData?.org_id) return { error: 'No org found' }
+
+  const validFields = ['buyer_agent_id', 'listing_agent_id', 'lender_id', 'inspector_id', 'title_company_id', 'escrow_agent_id']
+  if (!validFields.includes(roleField)) {
+    return { error: 'Invalid contact role field' }
+  }
+
+  const { error } = await supabase
+    .from('transactions')
+    .update({ 
+      [roleField]: contactId,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', transactionId)
+    .eq('org_id', userData.org_id)
+
+  if (error) {
+    console.error('Error updating transaction contact role:', error)
+    return { error: error.message }
+  }
+
+  revalidatePath(`/dashboard/transactions/${transactionId}/contacts`)
+  revalidatePath(`/dashboard/transactions/${transactionId}`)
+  return { success: true }
+}
+
